@@ -149,6 +149,10 @@ export const zh: Dictionary = {
       "正在起草应提出的问题…",
       "正在计算风险评分…",
     ],
+    etaPrefix: "预计还需",
+    etaAbout: "约 1 分钟",
+    etaSeconds: (n: number) => `${n} 秒`,
+    etaFinishing: "即将完成…",
   },
   errorState: {
     title: "出现了一些问题",

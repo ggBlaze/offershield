@@ -164,6 +164,10 @@ export const es: Dictionary = {
       "Redactando preguntas que hacer…",
       "Calculando la puntuación de riesgo…",
     ],
+    etaPrefix: "ETA:",
+    etaAbout: "~1 min",
+    etaSeconds: (n: number) => `${n} s`,
+    etaFinishing: "Casi listo…",
   },
   errorState: {
     title: "Algo salió mal",

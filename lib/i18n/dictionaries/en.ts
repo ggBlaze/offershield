@@ -163,6 +163,10 @@ export const en = {
       "Drafting questions to ask…",
       "Scoring the risk…",
     ],
+    etaPrefix: "ETA:",
+    etaAbout: "~1 min",
+    etaSeconds: (n: number) => `${n}s`,
+    etaFinishing: "Finishing up…",
   },
   errorState: {
     title: "Something went wrong",
