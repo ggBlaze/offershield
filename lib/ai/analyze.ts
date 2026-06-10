@@ -1,6 +1,6 @@
 import "server-only";
 import { AnalysisPayload, RiskLevel } from "./schema";
-import { MOCK_ANALYSIS } from "./mock";
+import { getMockAnalysis } from "./mocks";
 import { config } from "@/lib/env";
 import { callClaude, ProviderError } from "./provider";
 import { buildSystemPrompt, buildUserMessage, RETRY_MESSAGE } from "./prompt";
@@ -133,7 +133,7 @@ export async function analyzeDocument(
   if (config.mockMode || opts.forceMock) {
     // Small delay so the loading state is visible in the demo.
     await new Promise((r) => setTimeout(r, 700));
-    return MOCK_ANALYSIS;
+    return getMockAnalysis(locale);
   }
 
   const user = buildUserMessage(opts.text);

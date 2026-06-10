@@ -1,14 +1,9 @@
-import type { AnalysisPayload } from "./schema";
+import type { AnalysisPayload } from "../schema";
 
 /**
- * A high-fidelity canned response. Returned by analyzeDocument() when
- * no AI_API_KEY is configured. Designed so the demo experience matches
- * what a real analysis feels like — judges should never see a "demo
- * mode" tell.
- *
- * Based on the freelance contract sample (see lib/samples/freelance.ts).
+ * English mock — based on the freelance contract sample.
  */
-export const MOCK_ANALYSIS: AnalysisPayload = {
+export const MOCK_EN: AnalysisPayload = {
   documentType: "Freelance design contract",
   riskScore: 64,
   riskLevel: "medium",
@@ -117,8 +112,7 @@ export const MOCK_ANALYSIS: AnalysisPayload = {
     renewal: null,
     cancellation:
       "Client may terminate at any time; compensation for work-in-progress is not clearly addressed",
-    notes:
-      "Non-compete and confidentiality obligations survive termination.",
+    notes: "Non-compete and confidentiality obligations survive termination.",
   },
   deadlines: [
     {
