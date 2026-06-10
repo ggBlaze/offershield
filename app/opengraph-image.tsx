@@ -89,7 +89,7 @@ export default function OgImage() {
           }}
         >
           <div>Educational, not legal advice.</div>
-          <div>offershield.app</div>
+          <div>offershield.pro</div>
         </div>
       </div>
     ),

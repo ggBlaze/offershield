@@ -131,7 +131,7 @@ vercel --prod
 ### Example
 
 ```bash
-curl -X POST https://offershield.app/api/analyze \
+curl -X POST https://offershield.pro/api/analyze \
   -H "content-type: application/json" \
   -d '{ "text": "...your document...", "source": "paste" }'
 ```

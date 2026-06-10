@@ -9,7 +9,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const siteUrl = "https://offershield.app";
+const siteUrl = "https://offershield.pro";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
