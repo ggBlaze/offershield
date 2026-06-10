@@ -14,6 +14,9 @@ Deploys to **Vercel**, **Coolify**, **Render**, **Fly.io**, or any Docker host.
 
 ---
 
+<img width="1425" height="1621" alt="Screenshot_20260610_044602" src="https://github.com/user-attachments/assets/18fc1c9e-d042-48e5-9a86-757a42877698" />
+
+
 ## 🛡 What is OfferShield?
 
 OfferShield is a web app that turns dense legal text into a calm, structured report anyone can read. Paste a contract or upload a PDF, click **Analyze**, and get a plain-English walkthrough, color-coded risk flags, key dates, obligations, ambiguous phrases, and a copyable list of questions to ask before signing.
