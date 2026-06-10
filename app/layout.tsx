@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { LocaleProvider, isLocale, DEFAULT_LOCALE, LOCALES, LOCALE_TAG } from "@/lib/i18n";
 
@@ -11,6 +12,11 @@ const inter = Inter({
 });
 
 const siteUrl = "https://offershield.pro";
+// Read the GA measurement ID at build time. If unset (the
+// .env.example default), the GoogleAnalytics component renders
+// nothing — so the script never ships to the browser, no
+// tracking happens, and there's no key to leak in the bundle.
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() || "";
 
 /**
  * Top-level metadata. Per-locale title, description, and hreflang
@@ -101,6 +107,7 @@ export default function RootLayout({
     <html lang={htmlLang} className={`${inter.variable} dark`}>
       <body className="min-h-screen bg-background font-sans antialiased">
         <LocaleProvider initialLocale={initialLocale}>{children}</LocaleProvider>
+        {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
       </body>
     </html>
   );

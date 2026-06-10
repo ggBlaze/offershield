@@ -286,8 +286,23 @@ public/
 - Your document text is sent to the model **only to generate your report**.
 - Nothing is stored on OfferShield's servers.
 - The API key (when configured) is server-side only; the browser never sees it.
-- No analytics, no tracking, no third-party scripts.
+- **No analytics by default.** Google Analytics is **opt-in** — set
+  `NEXT_PUBLIC_GA_MEASUREMENT_ID` in your deploy env to enable it.
+  When unset, the GA script is not shipped to the browser at all
+  and nothing is tracked.
 - Every result page carries the disclaimer: **educational, not legal advice**.
+
+### Optional: Google Analytics
+
+```bash
+# .env.local or your hosting dashboard
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+The repo ships the standard `NEXT_PUBLIC_` prefix so the variable
+works in any Next.js-compatible host. The actual ID is read at
+build time — the public GitHub repo has no measurement ID
+committed.
 
 ---
 
