@@ -118,6 +118,22 @@ export const es: Dictionary = {
   analyzer: {
     trust:
       "Privado por defecto · no se guarda · se analiza solo para generar tu informe",
+    byok: {
+      collapsedLabel:
+        "Usa tu propia clave de MiniMax-M3 o Anthropic (opcional)",
+      activeLabel: (masked: string) => `Usando tu clave · ${masked}`,
+      description:
+        "Pega tu clave y la usaremos para tus análisis. Tu clave se guarda solo en tu navegador (localStorage) y se envía únicamente al modelo para tus peticiones — nunca se registra ni se almacena en nuestros servidores.",
+      placeholder: "sk-cp-… o sk-ant-…",
+      showKey: "Mostrar clave",
+      hideKey: "Ocultar clave",
+      save: "Guardar",
+      clear: "Borrar",
+      clearAria: "Borrar clave guardada",
+      invalidError: "Eso no parece una clave válida de MiniMax o Anthropic.",
+      formatNote:
+        "Solo validamos el formato — la solicitud va directa al modelo. Si tu clave es inválida, recibirás un 4xx del proveedor, mostrado como un error claro.",
+    },
     tabs: {
       paste: "Pegar texto",
       upload: "Subir PDF",

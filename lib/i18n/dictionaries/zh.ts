@@ -107,6 +107,21 @@ export const zh: Dictionary = {
   },
   analyzer: {
     trust: "默认私密 · 不存储 · 仅用于生成你的报告",
+    byok: {
+      collapsedLabel: "使用你自己的 MiniMax-M3 或 Anthropic 密钥(可选)",
+      activeLabel: (masked: string) => `正在使用你的密钥 · ${masked}`,
+      description:
+        "粘贴你的密钥,我们会在你的分析请求中使用它。密钥仅保存在你的浏览器中(localStorage),仅发送给模型用于你的请求 — 不会被记录或存储在我们的服务器上。",
+      placeholder: "sk-cp-… 或 sk-ant-…",
+      showKey: "显示密钥",
+      hideKey: "隐藏密钥",
+      save: "保存",
+      clear: "清除",
+      clearAria: "清除已保存的密钥",
+      invalidError: "这看起来不像是有效的 MiniMax 或 Anthropic 密钥。",
+      formatNote:
+        "仅做格式检查 — 请求本身会直接发送到模型。如果你的密钥无效,你会从提供方收到一个 4xx 错误,会以清晰的错误信息显示。",
+    },
     tabs: {
       paste: "粘贴文本",
       upload: "上传 PDF",

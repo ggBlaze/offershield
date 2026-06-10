@@ -3,6 +3,7 @@
 import * as React from "react";
 import { KeyRound, Eye, EyeOff, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * BYOK — Bring Your Own Key.
@@ -16,8 +17,12 @@ import { cn } from "@/lib/utils";
  *
  * If the key is removed, the analyzer falls back to the
  * server-configured key (if any), or to mock mode.
+ *
+ * All user-visible strings come from the active locale's
+ * dictionary so the component feels native in en / es / zh.
  */
 const STORAGE_KEY = "offershield:user-api-key";
+const KEY_REGEX = /^(sk-|sk-ant-|sk-cp-)[A-Za-z0-9_-]{16,}$/;
 
 function readKey(): string {
   try {
@@ -48,6 +53,7 @@ interface UserKeyInputProps {
 }
 
 export function UserKeyInput({ className }: UserKeyInputProps) {
+  const { t } = useLocale();
   const [open, setOpen] = React.useState(false);
   const [key, setKey] = React.useState("");
   const [draft, setDraft] = React.useState("");
@@ -64,8 +70,8 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
 
   const handleSave = () => {
     const trimmed = draft.trim();
-    if (trimmed && !/^(sk-|sk-ant-|sk-cp-)[A-Za-z0-9_-]{16,}$/.test(trimmed)) {
-      setError("That doesn't look like a valid MiniMax or Anthropic key.");
+    if (trimmed && !KEY_REGEX.test(trimmed)) {
+      setError(t.analyzer.byok.invalidError);
       return;
     }
     setError(null);
@@ -92,12 +98,11 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
         <span className="inline-flex items-center gap-1.5">
           <KeyRound className="h-3.5 w-3.5" />
           {key ? (
-            <>
-              <span className="text-foreground/80">Using your key</span>
-              <span className="font-mono text-foreground/60">{maskKey(key)}</span>
-            </>
+            <span className="text-foreground/80">
+              {t.analyzer.byok.activeLabel(maskKey(key))}
+            </span>
           ) : (
-            <span>Use your own MiniMax-M3 or Anthropic key (optional)</span>
+            <span>{t.analyzer.byok.collapsedLabel}</span>
           )}
         </span>
         <span className="text-muted-foreground/60">{open ? "▾" : "▸"}</span>
@@ -106,10 +111,7 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
       {open && (
         <div className="border-t border-border px-3 py-3 space-y-2">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Paste your key and we&apos;ll use it for your analyses.
-            Your key is saved only in your browser (localStorage) and
-            sent only to the model for your requests — never logged
-            or stored on our servers.
+            {t.analyzer.byok.description}
           </p>
 
           <div className="flex items-center gap-2">
@@ -122,7 +124,7 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
                   setDraft(e.target.value);
                   if (error) setError(null);
                 }}
-                placeholder="sk-cp-… or sk-ant-…"
+                placeholder={t.analyzer.byok.placeholder}
                 autoComplete="off"
                 spellCheck={false}
                 className={cn(
@@ -136,9 +138,13 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
                 type="button"
                 onClick={() => setShow((s) => !s)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-                aria-label={show ? "Hide key" : "Show key"}
+                aria-label={show ? t.analyzer.byok.hideKey : t.analyzer.byok.showKey}
               >
-                {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {show ? (
+                  <EyeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Eye className="h-3.5 w-3.5" />
+                )}
               </button>
             </div>
 
@@ -149,30 +155,26 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
               className="inline-flex items-center gap-1.5 rounded-md bg-primary/90 px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check className="h-3.5 w-3.5" />
-              Save
+              {t.analyzer.byok.save}
             </button>
 
             {key && (
               <button
                 type="button"
                 onClick={handleClear}
-                aria-label="Clear saved key"
+                aria-label={t.analyzer.byok.clearAria}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-transparent px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/5"
               >
                 <X className="h-3.5 w-3.5" />
-                Clear
+                {t.analyzer.byok.clear}
               </button>
             )}
           </div>
 
-          {error && (
-            <p className="text-xs text-rose-300">{error}</p>
-          )}
+          {error && <p className="text-xs text-rose-300">{error}</p>}
 
           <p className="text-[11px] text-muted-foreground/70">
-            Format check only — the request itself runs against the
-            model. If your key is invalid you&apos;ll get a 4xx from the
-            provider, surfaced as a clear error.
+            {t.analyzer.byok.formatNote}
           </p>
         </div>
       )}
@@ -182,7 +184,8 @@ export function UserKeyInput({ className }: UserKeyInputProps) {
 
 /**
  * Read the saved user key from localStorage. Returns an empty
- * string if not set or unavailable.
+ * string if not set or unavailable. Used by the Analyzer right
+ * before issuing each /api/analyze request.
  */
 export function getUserApiKey(): string {
   if (typeof window === "undefined") return "";

@@ -120,6 +120,22 @@ export const en = {
   },
   analyzer: {
     trust: "Private by default · not stored · analyzed only to generate your report",
+    byok: {
+      collapsedLabel:
+        "Use your own MiniMax-M3 or Anthropic key (optional)",
+      activeLabel: (masked: string) => `Using your key · ${masked}`,
+      description:
+        "Paste your key and we'll use it for your analyses. Your key is saved only in your browser (localStorage) and sent only to the model for your requests — never logged or stored on our servers.",
+      placeholder: "sk-cp-… or sk-ant-…",
+      showKey: "Show key",
+      hideKey: "Hide key",
+      save: "Save",
+      clear: "Clear",
+      clearAria: "Clear saved key",
+      invalidError: "That doesn't look like a valid MiniMax or Anthropic key.",
+      formatNote:
+        "Format check only — the request itself runs against the model. If your key is invalid you'll get a 4xx from the provider, surfaced as a clear error.",
+    },
     tabs: {
       paste: "Paste text",
       upload: "Upload PDF",
