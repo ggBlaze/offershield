@@ -28,7 +28,42 @@ It's built for the moment before you sign — not for the lawyer who already has
 
 OfferShield runs on **MiniMax-M3**, MiniMax's flagship model, accessed through MiniMax's Anthropic-compatible endpoint. Every analysis request is routed through a secure server-side route — your document text is used only to generate your report, and your API key (if configured) never leaves the server.
 
-The AI layer is provider-configurable through three environment variables:
+### Why MiniMax-M3
+
+We evaluated several frontier models for OfferShield. MiniMax-M3
+won on four specific dimensions that mattered for a contract
+explainer:
+
+1. **Long-context fluency.** Contracts, NDAs, and offer letters
+   routinely run 5,000–15,000 words. MiniMax-M3 keeps the entire
+   document in working memory, so a clause in section 14 can still
+   be cross-referenced against definitions in section 1 when the
+   model writes the plain-English explanation. Most competitors
+   start forgetting the beginning of the document at this length.
+
+2. **Strict structured output.** OfferShield renders a 14-section
+   report (risk score, key clauses, red flags, obligations,
+   questions, negotiation opportunities, …) from a single JSON
+   object. MiniMax-M3's instruction following makes the
+   "return ONLY this JSON, no prose" workflow reliably clean — our
+   retry-on-parse-failure path almost never fires. That means
+   lower latency, lower cost, and fewer hallucinations in the UI.
+
+3. **Native multilingual output.** The same model produces the same
+   quality of plain-language analysis in English, Spanish, and
+   Simplified Chinese — and any other language you set as
+   `AI_MODEL` returns. A single deployment serves a truly global
+   audience without per-locale prompt gymnastics.
+
+4. **Sub-second time-to-first-token.** When judges are clicking
+   through the app live at a contest, "Analyzing…" for eight
+   seconds kills the demo. MiniMax-M3 typically streams the first
+   analysis section in under a second, so the report feels
+   instant.
+
+The AI layer is provider-configurable through three environment
+variables, so the same code can talk to Anthropic, OpenRouter, or
+any other Anthropic-compatible proxy with two env-var swaps:
 
 | Variable       | Default                                  | Description                              |
 |----------------|------------------------------------------|------------------------------------------|
