@@ -17,7 +17,9 @@ function useTabs(component: string) {
 }
 
 interface TabsProps {
-  defaultValue: string;
+  /** Initial value for uncontrolled usage. Ignored when `value` is set. */
+  defaultValue?: string;
+  /** Controlled value. When provided, the component acts fully controlled. */
   value?: string;
   onValueChange?: (v: string) => void;
   className?: string;
@@ -31,7 +33,7 @@ export function Tabs({
   className,
   children,
 }: TabsProps) {
-  const [internal, setInternal] = React.useState(defaultValue);
+  const [internal, setInternal] = React.useState(defaultValue ?? "");
   const value = controlled ?? internal;
   const setValue = React.useCallback(
     (v: string) => {

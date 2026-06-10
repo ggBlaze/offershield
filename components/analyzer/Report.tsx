@@ -32,7 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatDate, formatRiskScore, riskClasses } from "@/lib/utils";
-import type { AnalysisPayload, RedFlag } from "@/types/analysis";
+import type { AnalysisPayload } from "@/types/analysis";
 import { useLocale } from "@/lib/i18n";
 
 /* --------------------------------- hooks --------------------------------- */
@@ -203,7 +203,7 @@ function RedFlagsCard({ payload }: { payload: AnalysisPayload }) {
         <CardTitle>{t.report.redFlags.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {payload.redFlags.map((flag: RedFlag, i) => (
+        {payload.redFlags.map((flag, i) => (
           <RedFlagRow key={i} flag={flag} />
         ))}
       </CardContent>
@@ -211,7 +211,7 @@ function RedFlagsCard({ payload }: { payload: AnalysisPayload }) {
   );
 }
 
-function RedFlagRow({ flag }: { flag: RedFlag }) {
+function RedFlagRow({ flag }: { flag: AnalysisPayload["redFlags"][number] }) {
   const c = riskClasses(flag.severity);
   return (
     <div

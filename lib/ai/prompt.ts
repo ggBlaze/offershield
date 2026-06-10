@@ -142,4 +142,4 @@ export const RETRY_MESSAGE =
   "Every field listed in the schema must be present. Remember to respond in the same language as the original document language requested.";
 
 /** Re-export the type for convenience. */
-export type { AnalysisPayload };
+export type { AnalysisPayload } from "./schema";

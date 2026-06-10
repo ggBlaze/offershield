@@ -256,6 +256,9 @@ export const en = {
     },
     documentType: (t: string) => `${t} · Confidence: `,
   },
-} as const;
-
-export type Dictionary = typeof en;
+};
+// (No top-level `as const` — we want `meta.title` / `description` to
+//  be typed as `string` so other locales can supply their own
+//  translations. The `messages` array still uses `as const` below
+//  to keep its tuple-of-literals shape — useful if a future change
+//  wants to enumerate them.)

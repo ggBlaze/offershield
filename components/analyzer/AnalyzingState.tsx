@@ -8,14 +8,19 @@ import { useLocale } from "@/lib/i18n";
 export function AnalyzingState() {
   const { t } = useLocale();
   const [idx, setIdx] = React.useState(0);
-  const messages = t.analyzing.messages;
+  // The dictionary is declared `as const`, so this tuple is typed as a
+  // fixed-length 6-tuple of literal strings. We widen to readonly
+  // string[] here so the .length / indexing logic stays dynamic
+  // (and so adding/removing messages in the dictionary doesn't
+  // require touching the component).
+  const messages: readonly string[] = t.analyzing.messages;
 
   React.useEffect(() => {
     if (messages.length === 0) return;
-    const t = setInterval(() => {
+    const handle = window.setInterval(() => {
       setIdx((i) => (i + 1) % messages.length);
     }, 1400);
-    return () => clearInterval(t);
+    return () => window.clearInterval(handle);
   }, [messages.length]);
 
   const current = messages[idx] ?? messages[0] ?? "…";
