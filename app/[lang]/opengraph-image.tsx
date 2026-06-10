@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { isLocale, type Locale } from "@/lib/i18n";
 
 export const runtime = "edge";
-export const alt = "OfferShield — Understand contracts before you sign";
+export const alt = "OfferShield.pro — Understand contracts before you sign";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,22 +16,23 @@ export function generateStaticParams() {
 }
 
 /**
- * Per-locale dynamic OG image. The text on the share card is localized
- * so a Spanish link shared on Twitter/X shows Spanish text in the
- * preview, etc.
+ * Social-share card for OfferShield.pro.
  *
- * Implementation notes for @vercel/og:
- *   - Every <div> with more than one child node must set
- *     `display: flex` (or `none`) explicitly. We default everything
- *     to flex and use the children property to control layout.
- *   - We avoid whitespace text nodes between elements by using
- *     `display: flex` on every parent and the `children` pattern.
+ * Brand voice stays in English (the marketing/identity language of
+ * the product) regardless of which locale the page is being served
+ * from, so a link shared from `/es` or `/zh` still shows a clean,
+ * professional English card on Twitter / LinkedIn / WhatsApp.
+ *
+ * The page itself remains fully localized — only the *share card*
+ * stays in English.
+ *
+ * Implementation notes for @vercel/og / satori:
+ *   - Every <div> with more than one child must set
+ *     `display: flex` (or `none`) explicitly.
  */
 export default function OgImage({ params }: { params: { lang: string } }) {
   const lang = params.lang as Locale;
   if (!isLocale(lang)) notFound();
-
-  const { headline, tagline, disclaimer, url } = copyFor(lang);
 
   return new ImageResponse(
     (
@@ -60,15 +61,15 @@ export default function OgImage({ params }: { params: { lang: string } }) {
           <div
             style={{
               display: "flex",
-              width: 48,
-              height: 48,
-              borderRadius: 12,
+              width: 56,
+              height: 56,
+              borderRadius: 14,
               alignItems: "center",
               justifyContent: "center",
               background:
                 "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(56,189,248,0.3))",
               border: "1px solid rgba(255,255,255,0.1)",
-              fontSize: 24,
+              fontSize: 28,
             }}
           >
             🛡
@@ -76,12 +77,12 @@ export default function OgImage({ params }: { params: { lang: string } }) {
           <div
             style={{
               display: "flex",
-              fontSize: 28,
+              fontSize: 32,
               fontWeight: 600,
               letterSpacing: -0.5,
             }}
           >
-            OfferShield
+            OfferShield.pro
           </div>
         </div>
 
@@ -90,32 +91,64 @@ export default function OgImage({ params }: { params: { lang: string } }) {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 24,
+            gap: 28,
           }}
         >
           <div
             style={{
               display: "flex",
-              fontSize: 64,
+              fontSize: 68,
               fontWeight: 700,
               lineHeight: 1.05,
               letterSpacing: -1.5,
-              maxWidth: 950,
+              maxWidth: 980,
             }}
           >
-            {headline}
+            Understand contracts before you sign.
           </div>
           <div
             style={{
               display: "flex",
-              fontSize: 24,
+              fontSize: 26,
               color: "rgba(255,255,255,0.7)",
               lineHeight: 1.4,
               maxWidth: 950,
             }}
           >
-            {tagline}
+            Plain-English explanations, risk flags, obligations, and smart
+            questions — built with love using MiniMax-M3.
           </div>
+        </div>
+
+        {/* Feature pills */}
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+          }}
+        >
+          {[
+            "Plain English",
+            "Risk Flags",
+            "Key Dates",
+            "Smart Questions",
+          ].map((label) => (
+            <div
+              key={label}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "10px 18px",
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                fontSize: 20,
+                color: "rgba(255,255,255,0.85)",
+              }}
+            >
+              {label}
+            </div>
+          ))}
         </div>
 
         {/* Footer row */}
@@ -128,46 +161,13 @@ export default function OgImage({ params }: { params: { lang: string } }) {
             color: "rgba(255,255,255,0.5)",
           }}
         >
-          <div style={{ display: "flex" }}>{disclaimer}</div>
-          <div style={{ display: "flex" }}>{url}</div>
+          <div style={{ display: "flex" }}>
+            Educational, not legal advice.
+          </div>
+          <div style={{ display: "flex" }}>offershield.pro</div>
         </div>
       </div>
     ),
     { ...size },
   );
-}
-
-function copyFor(lang: Locale): {
-  headline: string;
-  tagline: string;
-  disclaimer: string;
-  url: string;
-} {
-  switch (lang) {
-    case "es":
-      return {
-        headline: "Entiende los contratos antes de firmar.",
-        tagline:
-          "Resúmenes claros, alertas de riesgo, obligaciones y preguntas que hacer — hecho con MiniMax-M3.",
-        disclaimer: "Educativo, no consejo legal.",
-        url: "offershield.pro/es",
-      };
-    case "zh":
-      return {
-        headline: "签署之前,先读懂合同。",
-        tagline:
-          "通俗易懂的中文摘要、风险提示、双方义务清单,以及值得提出的问题 — 用 MiniMax-M3 用心打造。",
-        disclaimer: "仅供参考,非法律建议。",
-        url: "offershield.pro/zh",
-      };
-    case "en":
-    default:
-      return {
-        headline: "Understand contracts before you sign.",
-        tagline:
-          "Plain-English explanations, risk flags, obligations, and smart questions — built with MiniMax-M3.",
-        disclaimer: "Educational, not legal advice.",
-        url: "offershield.pro/en",
-      };
-  }
 }

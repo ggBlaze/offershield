@@ -6,7 +6,9 @@
 
 **Plain-English explanations of contracts, offer letters, NDAs, and more — powered by [MiniMax-M3](https://MiniMax.io).**
 
-[Live demo](#-quick-start) · [Features](#-features) · [Deploy on Vercel](#-deploy) · [API reference](#-api)
+[Live demo](#-quick-start) · [Features](#-features) · [Deploy](#-deploy) · [API reference](#-api)
+
+Deploys to **Vercel**, **Coolify**, **Render**, **Fly.io**, or any Docker host.
 
 </div>
 
@@ -95,7 +97,12 @@ No database, no auth, no state-management library. Just a fast, polished, deploy
 
 ## 🌐 Deploy
 
-### Vercel (recommended)
+You can deploy OfferShield.pro on **Vercel** (zero-config) or on
+**any Docker-compatible host** (Coolify, Render, Fly.io, your own VPS)
+using the included `Dockerfile`. Both paths give you a production
+build with the same behavior.
+
+### Vercel (fastest path)
 
 1. Push the repo to GitHub.
 2. Go to [vercel.com/new](https://vercel.com/new) and import the repo.
@@ -107,15 +114,68 @@ No database, no auth, no state-management library. Just a fast, polished, deploy
    > ⚠️ Apply to **Production**, not just Preview, or the live URL will hit the mock.
 5. Click **Deploy**. Live in ~60 seconds.
 
-### Vercel CLI
+### Coolify (self-hosted)
+
+Coolify is a great fit for OfferShield.pro — you keep full control of
+the server, the data, and the deployment, with no per-request or
+per-build fees. The repo ships with a multi-stage `Dockerfile` and a
+reference `docker-compose.yml` for this exact use case.
+
+**On the server, once:**
 
 ```bash
-npm i -g vercel
-vercel
-vercel env add AI_API_KEY   production
-vercel env add AI_BASE_URL  production
-vercel env add AI_MODEL     production
-vercel --prod
+# Install Coolify (Ubuntu / Debian) — see https://coolify.io/docs/installation
+curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
+```
+
+**In the Coolify dashboard:**
+
+1. **Project** → New → **Application** → **Public/Private Repository**
+   (or **GitHub App** for auto-deploys on push).
+2. Point it at this repository (`blaze/offershield` or your fork).
+3. **Build Pack**: choose **Dockerfile**. Coolify auto-detects the
+   `Dockerfile` in the repo root.
+4. **Port**: `3000`
+5. **Healthcheck Path**: `/api/health`
+6. **Environment Variables** (Production scope):
+   - `AI_API_KEY` — your MiniMax-M3 key
+   - `AI_BASE_URL` — defaults to `https://api.minimax.io/anthropic`
+   - `AI_MODEL` — defaults to `MiniMax-M3`
+7. **Domains**: add `offershield.pro` and (optionally) `www.offershield.pro`,
+   then point the DNS at your Coolify server as instructed by the
+   dashboard.
+8. **Deploy**. The first build pulls `node:20-alpine`, runs `npm ci`
+   + `npm run build`, and ships a ~150 MB image with the Next.js
+   standalone server.
+
+Coolify will auto-restart on crash, run the health check every 30
+seconds, and you can roll back to any previous deployment from the
+dashboard.
+
+> **Why the standalone build?** With `output: "standalone"` in
+> `next.config.mjs`, Next.js produces a self-contained server bundle
+> in `.next/standalone` that the `Dockerfile` copies directly. The
+> resulting image is roughly 3× smaller than the default
+> `node:20-alpine` + full `node_modules` build.
+
+### Plain Docker (no Coolify)
+
+If you'd rather not use Coolify:
+
+```bash
+docker build -t offershield .
+docker run -d --name offershield -p 3000:3000 \
+  -e AI_API_KEY=sk-cp-... \
+  -e AI_BASE_URL=https://api.minimax.io/anthropic \
+  -e AI_MODEL=MiniMax-M3 \
+  --restart unless-stopped \
+  offershield
+```
+
+Or use the included `docker-compose.yml`:
+
+```bash
+AI_API_KEY=sk-cp-... docker compose up -d
 ```
 
 ---

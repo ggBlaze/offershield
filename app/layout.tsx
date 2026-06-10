@@ -48,16 +48,28 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: siteUrl,
-    title: "OfferShield — Understand contracts before you sign",
+    title: "OfferShield.pro — Understand contracts before you sign",
     description:
-      "Plain-English explanations of contracts, offer letters, NDAs, and more. Built with MiniMax-M3.",
-    siteName: "OfferShield",
+      "Plain-English explanations, risk flags, obligations, and smart questions to ask. Built with love using MiniMax-M3.",
+    siteName: "OfferShield.pro",
+    images: [
+      {
+        url: `${siteUrl}/en/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "OfferShield.pro — Understand contracts before you sign",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OfferShield — Understand contracts before you sign",
+    title: "OfferShield.pro — Understand contracts before you sign",
     description:
-      "Plain-English explanations of contracts and offer letters. Built with MiniMax-M3.",
+      "Plain-English explanations, risk flags, obligations, and smart questions to ask. Built with love using MiniMax-M3.",
+    creator: "@OGDegen",
+    site: "@OGDegen",
+    images: [`${siteUrl}/en/opengraph-image`],
   },
   robots: {
     index: true,

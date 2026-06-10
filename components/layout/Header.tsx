@@ -17,7 +17,7 @@ export function Header() {
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/30 to-sky-500/30 ring-1 ring-white/10">
             <ShieldCheck className="h-4 w-4 text-indigo-200" />
           </span>
-          <span>OfferShield</span>
+          <span>OfferShield.pro</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">

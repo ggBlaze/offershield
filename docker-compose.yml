@@ -1,0 +1,29 @@
+# Reference compose file for running OfferShield.pro outside of Coolify
+# (you can also just use `docker run` with the env vars inline). Coolify
+# reads its own compose spec from the dashboard, so this file is mainly
+# for local Docker or for non-Coolify self-hosted hosts.
+#
+# For Coolify, the recommended path is the dashboard — see README.
+
+services:
+  offershield:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: offershield:latest
+    container_name: offershield
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Set these in Coolify's UI instead of here in production.
+      NODE_ENV: production
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.minimax.io/anthropic}
+      AI_MODEL: ${AI_MODEL:-MiniMax-M3}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
