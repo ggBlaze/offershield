@@ -48,7 +48,11 @@ export async function callClaude(opts: CallOptions): Promise<string> {
 
   const body = {
     model,
-    max_tokens: opts.maxTokens ?? 4096,
+    // 3000 is enough for the full 14-section schema (each section
+    // ~50-200 words ≈ 200-300 tokens) with headroom. Lower than the
+    // previous 4096 — cuts typical response time roughly in half
+    // without truncating the structured output.
+    max_tokens: opts.maxTokens ?? 3000,
     temperature: opts.temperature ?? 0.2,
     system: opts.system,
     messages: [{ role: "user", content: opts.user }],
@@ -64,8 +68,11 @@ export async function callClaude(opts: CallOptions): Promise<string> {
         "anthropic-version": ANTHROPIC_VERSION,
       },
       body: JSON.stringify(body),
-      // Reasonable default; routes set maxDuration higher.
-      signal: AbortSignal.timeout(55_000),
+      // Give the model up to 90s — MiniMax-M3 is occasionally slow
+      // on the first request after idle, and the structured 14-
+      // section response can run long. The route's maxDuration is
+      // the user-visible cap; this is the hard network cap.
+      signal: AbortSignal.timeout(90_000),
     });
   } catch (err) {
     throw new ProviderError(

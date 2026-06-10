@@ -5,7 +5,11 @@ import { clientKeyFromHeaders, takeToken } from "@/lib/rate-limit";
 import { isLocale, DEFAULT_LOCALE } from "@/lib/i18n";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+// 60s is the user-visible cap — long enough for MiniMax-M3 to
+// finish a 14-section structured response (typical 15-25s, but
+// cold starts and longer documents can run higher). Beyond this
+// the response is best-effort aborted.
+export const maxDuration = 60;
 
 const Body = z.object({
   text: z.string().min(1, "Document text is required."),
