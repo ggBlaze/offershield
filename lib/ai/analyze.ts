@@ -3,7 +3,8 @@ import { AnalysisPayload, RiskLevel } from "./schema";
 import { MOCK_ANALYSIS } from "./mock";
 import { config } from "@/lib/env";
 import { callClaude, ProviderError } from "./provider";
-import { SYSTEM_PROMPT, buildUserMessage, RETRY_MESSAGE } from "./prompt";
+import { buildSystemPrompt, buildUserMessage, RETRY_MESSAGE } from "./prompt";
+import type { Locale } from "@/lib/i18n";
 
 /**
  * Analyze a document and return a structured, validated payload.
@@ -114,6 +115,11 @@ function parseAndValidate(raw: string): AnalysisPayload {
 
 interface AnalyzeOptions {
   text: string;
+  /**
+   * Target locale for the response. Controls the language of every
+   * field value the model produces. Defaults to English.
+   */
+  locale?: Locale;
   /** Optional override for the mock — useful for unit tests. */
   forceMock?: boolean;
 }
@@ -122,6 +128,7 @@ export async function analyzeDocument(
   opts: AnalyzeOptions,
 ): Promise<AnalysisPayload> {
   assertValidInput(opts.text);
+  const locale: Locale = opts.locale ?? "en";
 
   if (config.mockMode || opts.forceMock) {
     // Small delay so the loading state is visible in the demo.
@@ -130,11 +137,12 @@ export async function analyzeDocument(
   }
 
   const user = buildUserMessage(opts.text);
+  const system = buildSystemPrompt(locale);
 
   // First attempt
   let text: string;
   try {
-    text = await callClaude({ system: SYSTEM_PROMPT, user });
+    text = await callClaude({ system, user });
   } catch (err) {
     if (err instanceof ProviderError) throw err;
     throw new ProviderError(
@@ -152,7 +160,7 @@ export async function analyzeDocument(
     // Single retry: ask the model to return valid JSON only.
     try {
       const retryText = await callClaude({
-        system: SYSTEM_PROMPT,
+        system,
         user: `${user}\n\n${RETRY_MESSAGE}`,
         temperature: 0,
       });

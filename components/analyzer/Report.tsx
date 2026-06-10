@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatDate, formatRiskScore, riskClasses } from "@/lib/utils";
 import type { AnalysisPayload, RedFlag } from "@/types/analysis";
+import { useLocale } from "@/lib/i18n";
 
 /* --------------------------------- hooks --------------------------------- */
 
@@ -53,6 +54,7 @@ function useCopy() {
 /* ------------------------------ Risk Score card --------------------------- */
 
 function RiskScoreCard({ payload }: { payload: AnalysisPayload }) {
+  const { t, locale } = useLocale();
   const c = riskClasses(payload.riskLevel);
   return (
     <Card className="md:col-span-1 overflow-hidden">
@@ -60,7 +62,7 @@ function RiskScoreCard({ payload }: { payload: AnalysisPayload }) {
         <div className="flex items-center justify-between">
           <CardDescription className="flex items-center gap-1.5">
             <Gauge className="h-3.5 w-3.5" />
-            Overall risk
+            {t.report.risk.tag}
           </CardDescription>
           <Badge variant="outline" className={cn("font-semibold", c.badge)}>
             {payload.riskLevel.toUpperCase()}
@@ -70,7 +72,7 @@ function RiskScoreCard({ payload }: { payload: AnalysisPayload }) {
           <span className="text-5xl font-semibold tracking-tight text-foreground">
             {formatRiskScore(payload.riskScore)}
           </span>
-          <span className="text-muted-foreground mb-1.5">/ 100</span>
+          <span className="text-muted-foreground mb-1.5">{t.report.risk.outOf(payload.riskScore)}</span>
         </div>
         <div className="mt-3 h-1.5 w-full rounded-full bg-white/[0.04] overflow-hidden">
           <div
@@ -84,7 +86,8 @@ function RiskScoreCard({ payload }: { payload: AnalysisPayload }) {
           {payload.riskExplanation}
         </p>
         <p className="text-xs text-muted-foreground/70 mt-3">
-          {payload.documentType} · Confidence: {payload.confidence}
+          {t.report.documentType(payload.documentType)}
+          {payload.confidence} ({locale})
         </p>
       </CardContent>
     </Card>
@@ -94,15 +97,16 @@ function RiskScoreCard({ payload }: { payload: AnalysisPayload }) {
 /* ------------------------------ Executive Summary ------------------------- */
 
 function ExecutiveSummaryCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   return (
     <Card className="md:col-span-2">
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5" />
-          Executive summary
+          {t.report.exec.tag}
         </CardDescription>
         <CardTitle className="text-xl font-semibold tracking-tight text-pretty">
-          {payload.documentType}
+          {payload.documentType || t.report.exec.fallback}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -117,14 +121,15 @@ function ExecutiveSummaryCard({ payload }: { payload: AnalysisPayload }) {
 /* --------------------------- Plain English explanation --------------------- */
 
 function PlainEnglishCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   return (
     <Card className="md:col-span-3">
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <FileText className="h-3.5 w-3.5" />
-          Plain-English explanation
+          {t.report.plain.tag}
         </CardDescription>
-        <CardTitle>Read before you sign</CardTitle>
+        <CardTitle>{t.report.plain.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-foreground/90 leading-relaxed text-pretty">
@@ -138,15 +143,16 @@ function PlainEnglishCard({ payload }: { payload: AnalysisPayload }) {
 /* --------------------------------- Key Clauses ----------------------------- */
 
 function KeyClausesCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.keyClauses.length === 0) return null;
   return (
     <Card>
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <KeyRound className="h-3.5 w-3.5" />
-          Key clauses
+          {t.report.clauses.tag}
         </CardDescription>
-        <CardTitle>What the main terms actually do</CardTitle>
+        <CardTitle>{t.report.clauses.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {payload.keyClauses.map((kc, i) => (
@@ -168,21 +174,20 @@ function KeyClausesCard({ payload }: { payload: AnalysisPayload }) {
 /* ---------------------------------- Red Flags ------------------------------ */
 
 function RedFlagsCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.redFlags.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardDescription className="flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
-            Red flags
+            {t.report.redFlags.tag}
           </CardDescription>
-          <CardTitle>No major red flags detected</CardTitle>
+          <CardTitle>{t.report.redFlags.emptyTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Based on this analysis, the document does not contain terms that
-            clearly warrant caution. You should still read the agreement and
-            consider asking a lawyer about anything you don't fully understand.
+            {t.report.redFlags.emptyBody}
           </p>
         </CardContent>
       </Card>
@@ -193,9 +198,9 @@ function RedFlagsCard({ payload }: { payload: AnalysisPayload }) {
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <AlertTriangle className="h-3.5 w-3.5 text-amber-300" />
-          Red flags
+          {t.report.redFlags.tag}
         </CardDescription>
-        <CardTitle>Worth a second look</CardTitle>
+        <CardTitle>{t.report.redFlags.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {payload.redFlags.map((flag: RedFlag, i) => (
@@ -236,21 +241,22 @@ function RedFlagRow({ flag }: { flag: RedFlag }) {
 /* ----------------------------- Obligations by Party ------------------------ */
 
 function ObligationsCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.obligations.length === 0) return null;
   const parties = ["you", "counterparty", "mutual"] as const;
-  const labels: Record<(typeof parties)[number], string> = {
-    you: "Your obligations",
-    counterparty: "Counterparty's obligations",
-    mutual: "Mutual obligations",
+  const labelFor = (p: (typeof parties)[number]) => {
+    if (p === "you") return t.report.obligations.you;
+    if (p === "counterparty") return t.report.obligations.counterparty;
+    return t.report.obligations.mutual;
   };
   return (
     <Card>
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <ClipboardList className="h-3.5 w-3.5" />
-          Obligations
+          {t.report.obligations.tag}
         </CardDescription>
-        <CardTitle>Who owes what</CardTitle>
+        <CardTitle>{t.report.obligations.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {parties.map((p) => {
@@ -259,7 +265,7 @@ function ObligationsCard({ payload }: { payload: AnalysisPayload }) {
           return (
             <div key={p}>
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                {labels[p]}
+                {labelFor(p)}
               </p>
               <ul className="space-y-2">
                 {entry.items.map((item, i) => (
@@ -283,25 +289,25 @@ function ObligationsCard({ payload }: { payload: AnalysisPayload }) {
 /* ----------------------------- Payment / Termination ----------------------- */
 
 function PaymentTermsCard({ payload }: { payload: AnalysisPayload }) {
-  const t = payload.paymentTerms;
-  const hasAny =
-    t.amount || t.schedule || t.lateFees || t.notes;
+  const { t } = useLocale();
+  const tp = payload.paymentTerms;
+  const hasAny = tp.amount || tp.schedule || tp.lateFees || tp.notes;
   if (!hasAny) return null;
   return (
     <Card>
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <Wallet className="h-3.5 w-3.5" />
-          Payment & compensation
+          {t.report.payment.tag}
         </CardDescription>
-        <CardTitle>The money side</CardTitle>
+        <CardTitle>{t.report.payment.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <TermRow label="Amount" value={t.amount} />
-          <TermRow label="Schedule" value={t.schedule} />
-          <TermRow label="Late fees" value={t.lateFees} />
-          <TermRow label="Notes" value={t.notes} />
+          <TermRow label={t.report.payment.amount} value={tp.amount} />
+          <TermRow label={t.report.payment.schedule} value={tp.schedule} />
+          <TermRow label={t.report.payment.lateFees} value={tp.lateFees} />
+          <TermRow label={t.report.payment.notes} value={tp.notes} />
         </dl>
       </CardContent>
     </Card>
@@ -309,24 +315,25 @@ function PaymentTermsCard({ payload }: { payload: AnalysisPayload }) {
 }
 
 function TerminationCard({ payload }: { payload: AnalysisPayload }) {
-  const t = payload.termination;
-  const hasAny = t.notice || t.renewal || t.cancellation || t.notes;
+  const { t } = useLocale();
+  const tn = payload.termination;
+  const hasAny = tn.notice || tn.renewal || tn.cancellation || tn.notes;
   if (!hasAny) return null;
   return (
     <Card>
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <Repeat2 className="h-3.5 w-3.5" />
-          Termination & renewal
+          {t.report.termination.tag}
         </CardDescription>
-        <CardTitle>How the agreement ends</CardTitle>
+        <CardTitle>{t.report.termination.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <TermRow label="Notice required" value={t.notice} />
-          <TermRow label="Renewal" value={t.renewal} />
-          <TermRow label="Cancellation" value={t.cancellation} />
-          <TermRow label="Notes" value={t.notes} />
+          <TermRow label={t.report.termination.notice} value={tn.notice} />
+          <TermRow label={t.report.termination.renewal} value={tn.renewal} />
+          <TermRow label={t.report.termination.cancellation} value={tn.cancellation} />
+          <TermRow label={t.report.termination.notes} value={tn.notes} />
         </dl>
       </CardContent>
     </Card>
@@ -354,15 +361,16 @@ function TermRow({
 /* ------------------------------- Deadlines --------------------------------- */
 
 function DeadlinesCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.deadlines.length === 0) return null;
   return (
     <Card className="md:col-span-2">
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5" />
-          Deadlines & important dates
+          {t.report.deadlines.tag}
         </CardDescription>
-        <CardTitle>Don't miss these</CardTitle>
+        <CardTitle>{t.report.deadlines.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-3">
@@ -392,15 +400,16 @@ function DeadlinesCard({ payload }: { payload: AnalysisPayload }) {
 /* ---------------------------- Missing Protections -------------------------- */
 
 function MissingProtectionsCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.missingProtections.length === 0) return null;
   return (
     <Card>
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <XCircle className="h-3.5 w-3.5 text-rose-300" />
-          Missing protections
+          {t.report.missing.tag}
         </CardDescription>
-        <CardTitle>What this agreement doesn't cover</CardTitle>
+        <CardTitle>{t.report.missing.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-2.5">
@@ -422,15 +431,16 @@ function MissingProtectionsCard({ payload }: { payload: AnalysisPayload }) {
 /* ----------------------------- Ambiguous Language -------------------------- */
 
 function AmbiguousLanguageCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.ambiguousLanguage.length === 0) return null;
   return (
     <Card className="md:col-span-2">
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <MessageSquareWarning className="h-3.5 w-3.5 text-amber-300" />
-          Ambiguous language
+          {t.report.ambiguous.tag}
         </CardDescription>
-        <CardTitle>Phrases worth clarifying</CardTitle>
+        <CardTitle>{t.report.ambiguous.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {payload.ambiguousLanguage.map((a, i) => (
@@ -442,7 +452,7 @@ function AmbiguousLanguageCard({ payload }: { payload: AnalysisPayload }) {
               "{a.quote}"
             </blockquote>
             <p className="text-sm text-muted-foreground leading-relaxed mt-2 text-pretty">
-              <span className="text-foreground/80 font-medium">Why it's unclear: </span>
+              <span className="text-foreground/80 font-medium">{t.report.ambiguous.why}</span>
               {a.whyUnclear}
             </p>
           </div>
@@ -455,6 +465,7 @@ function AmbiguousLanguageCard({ payload }: { payload: AnalysisPayload }) {
 /* ------------------------------ Questions to Ask --------------------------- */
 
 function QuestionsCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   const { copied, copy } = useCopy();
   const numbered = payload.questionsToAsk.map((q, i) => `${i + 1}. ${q}`).join("\n\n");
   return (
@@ -463,25 +474,25 @@ function QuestionsCard({ payload }: { payload: AnalysisPayload }) {
         <div>
           <CardDescription className="flex items-center gap-1.5">
             <HelpCircle className="h-3.5 w-3.5 text-primary" />
-            Questions to ask
+            {t.report.questions.tag}
           </CardDescription>
-          <CardTitle>Before you sign</CardTitle>
+          <CardTitle>{t.report.questions.title}</CardTitle>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => copy(numbered)}
-          aria-label="Copy all questions"
+          aria-label={t.report.questions.copyAria}
         >
           {copied ? (
             <>
               <Check className="h-3.5 w-3.5 text-emerald-400" />
-              Copied
+              {t.report.questions.copied}
             </>
           ) : (
             <>
               <Copy className="h-3.5 w-3.5" />
-              Copy all
+              {t.report.questions.copy}
             </>
           )}
         </Button>
@@ -508,15 +519,16 @@ function QuestionsCard({ payload }: { payload: AnalysisPayload }) {
 /* ----------------------------- Negotiation Opportunities ------------------- */
 
 function NegotiationCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   if (payload.negotiationOpportunities.length === 0) return null;
   return (
     <Card className="md:col-span-3">
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <Lightbulb className="h-3.5 w-3.5" />
-          Negotiation opportunities
+          {t.report.negotiation.tag}
         </CardDescription>
-        <CardTitle>Concrete things to push back on</CardTitle>
+        <CardTitle>{t.report.negotiation.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -538,19 +550,22 @@ function NegotiationCard({ payload }: { payload: AnalysisPayload }) {
 /* ------------------------- Confidence / Caveat / Disclaimer ---------------- */
 
 function ConfidenceCard({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   return (
     <Card className="md:col-span-3">
       <CardHeader>
         <CardDescription className="flex items-center gap-1.5">
           <Scale className="h-3.5 w-3.5" />
-          Confidence & caveat
+          {t.report.confidence.tag}
         </CardDescription>
-        <CardTitle>How much to trust this</CardTitle>
+        <CardTitle>{t.report.confidence.title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <Badge variant="muted">Confidence: {payload.confidence}</Badge>
-          <Badge variant="muted">Educational, not legal advice</Badge>
+          <Badge variant="muted">
+            {t.report.documentType("").replace(" · ", "")}: {payload.confidence}
+          </Badge>
+          <Badge variant="muted">{t.report.confidence.educational}</Badge>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed text-pretty">
           {payload.caveat}
@@ -561,16 +576,14 @@ function ConfidenceCard({ payload }: { payload: AnalysisPayload }) {
 }
 
 function DisclaimerBanner() {
+  const { t } = useLocale();
   return (
     <div className="rounded-xl border border-amber-500/30 bg-amber-500/[0.05] p-4 md:p-5 text-sm">
       <p className="font-medium text-amber-200">
-        OfferShield provides educational information, not legal advice.
+        {t.report.disclaimer.title}
       </p>
       <p className="text-amber-200/80 mt-1.5 leading-relaxed">
-        The analysis above is generated by an AI and is meant to help you
-        understand a document, not to replace a qualified lawyer. For any
-        decision with real consequences, please consult a licensed attorney
-        in your jurisdiction.
+        {t.report.disclaimer.body}
       </p>
     </div>
   );
@@ -579,6 +592,7 @@ function DisclaimerBanner() {
 /* ---------------------------------- Report --------------------------------- */
 
 export function Report({ payload }: { payload: AnalysisPayload }) {
+  const { t } = useLocale();
   const ref = React.useRef<HTMLDivElement | null>(null);
   // Smooth-scroll into view the first time a report renders.
   React.useEffect(() => {
@@ -595,18 +609,18 @@ export function Report({ payload }: { payload: AnalysisPayload }) {
       <header className="flex items-end justify-between gap-4 pt-2">
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Your report
+            {t.report.heading.tag}
           </p>
           <h2
             id="report-heading"
             className="text-2xl md:text-3xl font-semibold tracking-tight text-balance"
           >
-            Read before you sign
+            {t.report.heading.title}
           </h2>
         </div>
         <Badge variant="muted" className="hidden sm:inline-flex">
           <Sparkles className="h-3 w-3" />
-          Generated by OfferShield
+          {t.report.heading.generatedBy}
         </Badge>
       </header>
 

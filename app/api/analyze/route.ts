@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { analyzeDocument, AnalysisInputError, AnalysisParseError } from "@/lib/ai/analyze";
 import { clientKeyFromHeaders, takeToken } from "@/lib/rate-limit";
+import { isLocale, DEFAULT_LOCALE } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -9,6 +10,10 @@ export const maxDuration = 30;
 const Body = z.object({
   text: z.string().min(1, "Document text is required."),
   source: z.enum(["paste", "pdf", "sample"]).default("paste"),
+  language: z
+    .string()
+    .optional()
+    .transform((v) => (isLocale(v) ? v : DEFAULT_LOCALE)),
 });
 
 export async function POST(req: Request) {
@@ -36,8 +41,15 @@ export async function POST(req: Request) {
   }
 
   try {
-    const payload = await analyzeDocument({ text: body.text });
-    return NextResponse.json({ result: payload, source: body.source });
+    const payload = await analyzeDocument({
+      text: body.text,
+      locale: body.language,
+    });
+    return NextResponse.json({
+      result: payload,
+      source: body.source,
+      language: body.language,
+    });
   } catch (err) {
     if (err instanceof AnalysisInputError) {
       return NextResponse.json(

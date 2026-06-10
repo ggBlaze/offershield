@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { useLocale } from "@/lib/i18n";
 
 export default function GlobalError({
   error,
@@ -14,6 +15,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useLocale();
   useEffect(() => {
     console.error("[offershield] app error:", error);
   }, [error]);
@@ -29,7 +31,7 @@ export default function GlobalError({
             </div>
             <div>
               <h1 className="text-xl font-semibold tracking-tight">
-                Something went wrong
+                {t.errorState.title}
               </h1>
               <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
                 OfferShield hit an unexpected error. You can try again, or come
@@ -43,7 +45,7 @@ export default function GlobalError({
             </div>
             <Button onClick={reset}>
               <RotateCcw className="h-4 w-4" />
-              Try again
+              {t.errorState.retry}
             </Button>
           </CardContent>
         </Card>

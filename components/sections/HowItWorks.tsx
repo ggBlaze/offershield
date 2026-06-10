@@ -1,40 +1,28 @@
+"use client";
+
 import { ClipboardPaste, Sparkles, FileSearch } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLocale } from "@/lib/i18n";
 
-const STEPS = [
-  {
-    icon: ClipboardPaste,
-    title: "Paste or upload",
-    body: "Drop in a contract, offer letter, NDA, or any document — text or PDF. Or try a built-in sample.",
-  },
-  {
-    icon: Sparkles,
-    title: "Click analyze",
-    body: "OfferShield reads the document, identifies key clauses, and surfaces risks in a few seconds.",
-  },
-  {
-    icon: FileSearch,
-    title: "Read your report",
-    body: "Get a plain-English explanation, red flags, obligations, and questions to ask before signing.",
-  },
-];
+const STEPS_ICONS = [ClipboardPaste, Sparkles, FileSearch];
 
 export function HowItWorks() {
+  const { t } = useLocale();
   return (
     <section id="how" className="py-20 md:py-24">
       <div className="container">
         <div className="mx-auto max-w-2xl text-center mb-12">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            How it works
+            {t.howItWorks.tag}
           </p>
           <h2 className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight text-balance">
-            Three steps. About a minute.
+            {t.howItWorks.title}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {STEPS.map((step, i) => {
-            const Icon = step.icon;
+          {t.howItWorks.steps.map((step, i) => {
+            const Icon = STEPS_ICONS[i] ?? ClipboardPaste;
             return (
               <Card key={i}>
                 <CardContent className="p-6 md:p-8">

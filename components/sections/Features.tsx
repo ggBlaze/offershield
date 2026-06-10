@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FileText,
   AlertTriangle,
@@ -7,56 +9,27 @@ import {
   Lock,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLocale } from "@/lib/i18n";
 
-const FEATURES = [
-  {
-    icon: FileText,
-    title: "Plain-English explanations",
-    body: "Get a calm walkthrough of what the document actually does — no legal jargon required.",
-  },
-  {
-    icon: AlertTriangle,
-    title: "Risk flags you can act on",
-    body: "Color-coded severity for every concern, with the specific clause it came from.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Key dates & obligations",
-    body: "Deadlines, renewal triggers, and what each party owes — extracted and laid out clearly.",
-  },
-  {
-    icon: HelpCircle,
-    title: "Smart questions to ask",
-    body: "A copyable list of specific, useful questions for the other side or your lawyer.",
-  },
-  {
-    icon: Layers,
-    title: "Multiple document types",
-    body: "Offer letters, freelance contracts, NDAs, SaaS terms, vendor agreements, and more.",
-  },
-  {
-    icon: Lock,
-    title: "Private by default",
-    body: "Your document text is used only to generate your report. Nothing is stored.",
-  },
-];
+const ICONS = [FileText, AlertTriangle, CalendarDays, HelpCircle, Layers, Lock];
 
 export function Features() {
+  const { t } = useLocale();
   return (
     <section id="features" className="py-20 md:py-24">
       <div className="container">
         <div className="mx-auto max-w-2xl text-center mb-12">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            What you get
+            {t.features.tag}
           </p>
           <h2 className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight text-balance">
-            Built to help you make better decisions.
+            {t.features.title}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((f, i) => {
-            const Icon = f.icon;
+          {t.features.items.map((f, i) => {
+            const Icon = ICONS[i] ?? FileText;
             return (
               <Card key={i} className="hover:border-white/15 transition-colors">
                 <CardContent className="p-6">

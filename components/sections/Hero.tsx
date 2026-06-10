@@ -3,6 +3,7 @@
 import { Sparkles, ShieldCheck, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * The Hero lets users jump into the analyzer with a sample document
@@ -36,6 +37,7 @@ export const ANALYZER_EVENTS = {
 } as const;
 
 export function Hero() {
+  const { t } = useLocale();
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 hero-gradient" aria-hidden />
@@ -45,21 +47,20 @@ export function Hero() {
         <div className="mx-auto max-w-3xl text-center">
           <Badge variant="muted" className="mb-6 mx-auto inline-flex">
             <Sparkles className="h-3 w-3 text-indigo-300" />
-            AI-powered contract explainer
+            {t.hero.badge}
           </Badge>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-balance leading-[1.05]">
-            Understand contracts{" "}
+            {t.hero.h1Before}{" "}
             <span className="bg-gradient-to-br from-indigo-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">
-              before you sign.
+              {t.hero.h1Highlight}
             </span>
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed text-pretty max-w-2xl mx-auto">
-            OfferShield turns dense legal text into plain-English summaries, risk
-            flags, obligations, and smart questions to ask —{" "}
+            {t.hero.subhead}
             <span className="text-foreground/80">
-              built with love using MiniMax-M3
+              {t.hero.subheadHighlight}
             </span>
             .
           </p>
@@ -71,7 +72,7 @@ export function Hero() {
               onClick={() => dispatchTrySample("freelance")}
             >
               <Sparkles className="h-4 w-4" />
-              Try a sample
+              {t.hero.ctaPrimary}
               <ArrowRight className="h-4 w-4" />
             </Button>
             <Button
@@ -79,18 +80,18 @@ export function Hero() {
               variant="outline"
               onClick={dispatchFocusPaste}
             >
-              Paste your document
+              {t.hero.ctaSecondary}
             </Button>
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5" />
-              Private by default — text analyzed only to generate your report
+              {t.hero.private}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              Educational, not legal advice
+              {t.hero.educational}
             </span>
           </div>
         </div>

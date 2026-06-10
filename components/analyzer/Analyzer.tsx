@@ -9,10 +9,12 @@ import type { SampleDoc } from "@/lib/samples";
 import { getSampleById } from "@/lib/samples";
 import type { AnalysisPayload } from "@/types/analysis";
 import { ANALYZER_EVENTS } from "@/components/sections/Hero";
+import { useLocale } from "@/lib/i18n";
 
 type Status = "idle" | "uploading" | "analyzing" | "error";
 
 export function Analyzer() {
+  const { locale } = useLocale();
   const [tab, setTab] = React.useState<InputTab>("paste");
   const [text, setText] = React.useState("");
   const [file, setFile] = React.useState<File | null>(null);
@@ -144,7 +146,7 @@ export function Analyzer() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text: textToAnalyze, source }),
+        body: JSON.stringify({ text: textToAnalyze, source, language: locale }),
       });
       const data = (await res.json()) as
         | { result: AnalysisPayload }
@@ -163,7 +165,7 @@ export function Analyzer() {
       setError("Network error. Please check your connection and try again.");
       setStatus("error");
     }
-  }, [tab, text, file, selectedSampleId]);
+  }, [tab, text, file, selectedSampleId, locale]);
 
   // Keep result visible while in idle after a successful analysis.
 

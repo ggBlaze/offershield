@@ -3,25 +3,22 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const MESSAGES = [
-  "Reading your document…",
-  "Identifying key clauses…",
-  "Surfacing red flags…",
-  "Mapping obligations…",
-  "Drafting questions to ask…",
-  "Scoring the risk…",
-];
+import { useLocale } from "@/lib/i18n";
 
 export function AnalyzingState() {
+  const { t } = useLocale();
   const [idx, setIdx] = React.useState(0);
+  const messages = t.analyzing.messages;
 
   React.useEffect(() => {
+    if (messages.length === 0) return;
     const t = setInterval(() => {
-      setIdx((i) => (i + 1) % MESSAGES.length);
+      setIdx((i) => (i + 1) % messages.length);
     }, 1400);
     return () => clearInterval(t);
-  }, []);
+  }, [messages.length]);
+
+  const current = messages[idx] ?? messages[0] ?? "…";
 
   return (
     <div className="space-y-4" aria-busy="true" aria-live="polite">
@@ -30,7 +27,7 @@ export function AnalyzingState() {
           <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
         </span>
-        <span className="text-foreground/90">{MESSAGES[idx]}</span>
+        <span className="text-foreground/90">{current}</span>
       </div>
 
       {/* Skeleton placeholders matching the report layout */}

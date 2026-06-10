@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { SampleChips } from "./SampleChips";
 import { SAMPLE_DOCS, type SampleDoc } from "@/lib/samples";
 import { cn, countWords, formatBytes, readingTimeMinutes } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n";
 
 const MIN_CHARS = 100;
 const MAX_CHARS = 25_000;
@@ -46,6 +47,7 @@ export function DocumentInput({
   onAnalyze,
   busy,
 }: DocumentInputProps) {
+  const { t } = useLocale();
   const [dragOver, setDragOver] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -73,16 +75,16 @@ export function DocumentInput({
         return;
       }
       if (!f.name.toLowerCase().endsWith(".pdf") && !f.type.includes("pdf")) {
-        setUploadError("Please choose a PDF file.");
+        setUploadError(t.analyzer.upload.wrongType);
         return;
       }
       if (f.size > 4.5 * 1024 * 1024) {
-        setUploadError("File is too large. Keep PDFs under 4.5 MB.");
+        setUploadError(t.analyzer.upload.tooLarge);
         return;
       }
       onFileChange(f);
     },
-    [onFileChange],
+    [onFileChange, t.analyzer.upload.wrongType, t.analyzer.upload.tooLarge],
   );
 
   return (
@@ -93,20 +95,18 @@ export function DocumentInput({
             <TabsList>
               <TabsTrigger value="paste">
                 <ClipboardPaste className="h-3.5 w-3.5" />
-                Paste text
+                {t.analyzer.tabs.paste}
               </TabsTrigger>
               <TabsTrigger value="upload">
                 <FileUp className="h-3.5 w-3.5" />
-                Upload PDF
+                {t.analyzer.tabs.upload}
               </TabsTrigger>
               <TabsTrigger value="sample">
                 <Sparkles className="h-3.5 w-3.5" />
-                Try a sample
+                {t.analyzer.tabs.sample}
               </TabsTrigger>
             </TabsList>
-            <p className="text-xs text-muted-foreground">
-              Private by default · not stored · analyzed only to generate your report
-            </p>
+            <p className="text-xs text-muted-foreground">{t.analyzer.trust}</p>
           </div>
 
           {/* Paste */}
@@ -115,28 +115,31 @@ export function DocumentInput({
               <Textarea
                 value={text}
                 onChange={(e) => onTextChange(e.target.value)}
-                placeholder="Paste your contract, offer letter, NDA, or any document here…"
+                placeholder={t.analyzer.paste.placeholder}
                 rows={12}
                 className="font-mono text-[13px] leading-relaxed"
                 disabled={busy}
-                aria-label="Document text"
+                aria-label={t.analyzer.tabs.paste}
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
-                  {charCount.toLocaleString()} / {MAX_CHARS.toLocaleString()}{" "}
-                  characters
-                  {charCount > 0 && (
-                    <> · {countWords(text).toLocaleString()} words · ~{readingTimeMinutes(text)} min read</>
-                  )}
+                  {charCount > 0
+                    ? t.analyzer.paste.charCounterWithMeta(
+                        charCount,
+                        MAX_CHARS,
+                        countWords(text),
+                        readingTimeMinutes(text),
+                      )
+                    : t.analyzer.paste.charCounter(charCount, MAX_CHARS)}
                 </span>
                 {tooShort && (
                   <span className="text-amber-300">
-                    Add a bit more — at least {MIN_CHARS} characters.
+                    {t.analyzer.paste.tooShort(MIN_CHARS)}
                   </span>
                 )}
                 {tooLong && (
                   <span className="text-rose-300">
-                    Too long. Trim to {MAX_CHARS.toLocaleString()} characters.
+                    {t.analyzer.paste.tooLong(MAX_CHARS)}
                   </span>
                 )}
               </div>
@@ -189,10 +192,12 @@ export function DocumentInput({
                 </div>
                 <div>
                   <p className="text-sm font-medium">
-                    {file ? "Replace file" : "Drop a PDF here, or click to choose"}
+                    {file
+                      ? t.analyzer.upload.replace
+                      : t.analyzer.upload.dropZone}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Up to 4.5 MB. Text-based PDFs work best.
+                    {t.analyzer.upload.hint}
                   </p>
                 </div>
               </div>
@@ -216,7 +221,7 @@ export function DocumentInput({
                     type="button"
                     onClick={() => handleFile(null)}
                     className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5"
-                    aria-label="Remove file"
+                    aria-label={t.analyzer.upload.removeFile}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -229,7 +234,7 @@ export function DocumentInput({
           <TabsContent value="sample">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Pick a sample to see how OfferShield works — no upload or paste required.
+                {t.analyzer.sample.prompt}
               </p>
               <SampleChips
                 onSelect={onSelectSample}
@@ -238,7 +243,7 @@ export function DocumentInput({
               />
               {text && selectedSampleId && (
                 <p className="text-xs text-muted-foreground">
-                  Sample loaded. Ready to analyze.
+                  {t.analyzer.sample.loaded}
                 </p>
               )}
             </div>
@@ -247,9 +252,7 @@ export function DocumentInput({
       </div>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-border bg-white/[0.015] px-6 md:px-8 py-4">
-        <p className="text-xs text-muted-foreground">
-          OfferShield provides educational information, not legal advice.
-        </p>
+        <p className="text-xs text-muted-foreground">{t.analyzer.inline}</p>
         <Button
           size="lg"
           variant="gradient"
@@ -260,12 +263,12 @@ export function DocumentInput({
           {busy ? (
             <span className="inline-flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-white/80 animate-pulse-soft" />
-              Analyzing…
+              {t.analyzer.button.analyzing}
             </span>
           ) : (
             <>
               <Sparkles className="h-4 w-4" />
-              Analyze document
+              {t.analyzer.button.analyze}
             </>
           )}
         </Button>
