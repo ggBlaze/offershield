@@ -49,6 +49,9 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Compensate for the sticky 56px header so anchor links don't
+       land underneath it. */
+    scroll-padding-top: 5rem;
   }
 
   body {

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 
 export function Footer() {
@@ -25,9 +24,14 @@ export function Footer() {
           <a href="#disclaimer" className="hover:text-foreground transition-colors">
             Disclaimer
           </a>
-          <Link href="/api/health" className="hover:text-foreground transition-colors">
+          <a
+            href="/api/health"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
             Status
-          </Link>
+          </a>
         </div>
       </div>
     </footer>

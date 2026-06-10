@@ -25,24 +25,6 @@ export function Analyzer() {
 
   const resultsRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Listen for cross-component events from the Hero CTAs.
-  React.useEffect(() => {
-    const onTrySample = (e: Event) => {
-      const detail = (e as CustomEvent<{ sampleId: string }>).detail;
-      const doc = getSampleById(detail.sampleId);
-      if (doc) handleSelectSample(doc);
-    };
-    const onFocusPaste = () => {
-      handleTabChange("paste");
-    };
-    window.addEventListener(ANALYZER_EVENTS.TRY_SAMPLE, onTrySample);
-    window.addEventListener(ANALYZER_EVENTS.FOCUS_PASTE, onFocusPaste);
-    return () => {
-      window.removeEventListener(ANALYZER_EVENTS.TRY_SAMPLE, onTrySample);
-      window.removeEventListener(ANALYZER_EVENTS.FOCUS_PASTE, onFocusPaste);
-    };
-  }, [handleSelectSample, handleTabChange]);
-
   const reset = React.useCallback(() => {
     setStatus("idle");
     setError(null);
@@ -85,6 +67,26 @@ export function Analyzer() {
     setError(null);
     setStatus("idle");
   }, []);
+
+  // Listen for cross-component events from the Hero CTAs.
+  // NOTE: must come AFTER the useCallback declarations above to avoid a
+  // temporal dead zone (ReferenceError) on initial render.
+  React.useEffect(() => {
+    const onTrySample = (e: Event) => {
+      const detail = (e as CustomEvent<{ sampleId: string }>).detail;
+      const doc = getSampleById(detail.sampleId);
+      if (doc) handleSelectSample(doc);
+    };
+    const onFocusPaste = () => {
+      handleTabChange("paste");
+    };
+    window.addEventListener(ANALYZER_EVENTS.TRY_SAMPLE, onTrySample);
+    window.addEventListener(ANALYZER_EVENTS.FOCUS_PASTE, onFocusPaste);
+    return () => {
+      window.removeEventListener(ANALYZER_EVENTS.TRY_SAMPLE, onTrySample);
+      window.removeEventListener(ANALYZER_EVENTS.FOCUS_PASTE, onFocusPaste);
+    };
+  }, [handleSelectSample, handleTabChange]);
 
   const handleAnalyze = React.useCallback(async () => {
     setError(null);
