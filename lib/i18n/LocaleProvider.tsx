@@ -12,11 +12,14 @@ import { dictionaries, type Dictionary } from "./dictionaries";
 /**
  * React context for the current locale.
  *
- * The provider renders with `DEFAULT_LOCALE` on the server and on the
- * first client render, so server-rendered HTML matches the initial
- * client HTML (no hydration mismatch). On mount, we read the stored
- * locale from `localStorage` and update — any localized text below
- * that needed to change updates immediately.
+ * The provider can be initialized with a server-known `initialLocale`
+ * (typically derived from the URL by middleware). That value drives
+ * the first render — both the server render and the matching client
+ * hydration render — so the HTML is in the right language for SEO.
+ *
+ * After hydration, the user can still switch languages; we read the
+ * stored value from `localStorage` on mount to honor a previously
+ * saved preference (if the URL didn't already dictate it).
  */
 export interface LocaleContextValue {
   locale: Locale;
@@ -26,14 +29,29 @@ export interface LocaleContextValue {
 
 const LocaleContext = React.createContext<LocaleContextValue | null>(null);
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = React.useState<Locale>(DEFAULT_LOCALE);
+interface LocaleProviderProps {
+  children: React.ReactNode;
+  /**
+   * Locale to render on the server and on first client render. Should
+   * be derived from the URL (or another server-known source) so that
+   * the HTML matches the request. Defaults to `DEFAULT_LOCALE`.
+   */
+  initialLocale?: Locale;
+}
 
-  // Load from localStorage on mount, after hydration.
+export function LocaleProvider({
+  children,
+  initialLocale = DEFAULT_LOCALE,
+}: LocaleProviderProps) {
+  const [locale, setLocaleState] = React.useState<Locale>(initialLocale);
+
+  // Load from localStorage on mount, after hydration. If the stored
+  // value differs from what the URL said, the user's saved preference
+  // wins. (The URL is only the default for new visitors.)
   React.useEffect(() => {
     try {
       const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (isLocale(stored) && stored !== locale) {
+      if (isLocale(stored) && stored !== initialLocale) {
         setLocaleState(stored);
       }
     } catch {

@@ -1,31 +1,13 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { Hero } from "@/components/sections/Hero";
-import { HowItWorks } from "@/components/sections/HowItWorks";
-import { Features } from "@/components/sections/Features";
-import { Trust } from "@/components/sections/Trust";
-import { DisclaimerBanner } from "@/components/sections/DisclaimerBanner";
-import { Analyzer } from "@/components/analyzer/Analyzer";
+import { redirect } from "next/navigation";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
 
-export default function HomePage() {
-  return (
-    <>
-      <Header />
-      <main>
-        <Hero />
-
-        <section className="pb-20">
-          <div className="container">
-            <Analyzer />
-          </div>
-        </section>
-
-        <HowItWorks />
-        <Features />
-        <Trust />
-        <DisclaimerBanner />
-      </main>
-      <Footer />
-    </>
-  );
+/**
+ * Root `/` route. The middleware already issues a 307 to the user's
+ * preferred locale before reaching this point, so reaching here is
+ * rare — but if it does happen (e.g. middleware was bypassed during
+ * a build or in an unusual request), fall through to the default
+ * locale rather than 404.
+ */
+export default function RootRedirect() {
+  redirect(`/${DEFAULT_LOCALE}`);
 }
