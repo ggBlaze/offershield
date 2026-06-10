@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "OfferShield" }],
   creator: "OfferShield",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

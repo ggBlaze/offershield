@@ -99,6 +99,8 @@ export const zh: Dictionary = {
   },
   footer: {
     copyright: (year: number) => `© ${year} OfferShield`,
+    by: "由",
+    creditAria: "Blaze 在 X 上(在新标签页打开)",
     builtWith: "用心打造",
     using: "使用",
     model: "MiniMax-M3",

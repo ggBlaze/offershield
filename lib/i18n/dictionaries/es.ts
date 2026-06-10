@@ -109,6 +109,8 @@ export const es: Dictionary = {
   },
   footer: {
     copyright: (year: number) => `© ${year} OfferShield`,
+    by: "por",
+    creditAria: "Blaze en X (se abre en una pestaña nueva)",
     builtWith: "Hecho con",
     using: "usando",
     model: "MiniMax-M3",

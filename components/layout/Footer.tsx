@@ -3,6 +3,8 @@
 import { ShieldCheck } from "lucide-react";
 import { useLocale } from "@/lib/i18n";
 
+const BLAZE_X_URL = "https://x.com/OGDegen";
+
 export function Footer() {
   const { t } = useLocale();
   const year = new Date().getFullYear();
@@ -13,12 +15,30 @@ export function Footer() {
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-indigo-500/30 to-sky-500/30 ring-1 ring-white/10">
             <ShieldCheck className="h-3.5 w-3.5 text-indigo-200" />
           </span>
-          <span>{t.footer.copyright(year)}</span>
+          <span>
+            {t.footer.copyright(year)}{" "}
+            <span className="text-muted-foreground/80">{t.footer.by}</span>{" "}
+            <a
+              href={BLAZE_X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.footer.creditAria}
+              className="font-medium text-foreground hover:text-indigo-300 transition-colors"
+            >
+              Blaze
+              <span className="text-rose-300" aria-hidden>
+                🔥
+              </span>
+            </a>
+          </span>
         </div>
 
         <p className="text-sm text-muted-foreground">
           {t.footer.builtWith}{" "}
-          <span className="text-rose-300">♥</span> {t.footer.using}{" "}
+          <span className="text-rose-300" aria-hidden>
+            ♥
+          </span>{" "}
+          {t.footer.using}{" "}
           <span className="font-medium text-foreground">{t.footer.model}</span>
         </p>
 

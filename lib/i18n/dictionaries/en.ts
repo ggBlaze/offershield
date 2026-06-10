@@ -112,6 +112,8 @@ export const en = {
   },
   footer: {
     copyright: (year: number) => `© ${year} OfferShield`,
+    by: "by",
+    creditAria: "Blaze on X (opens in a new tab)",
     builtWith: "Built with",
     using: "using",
     model: "MiniMax-M3",
