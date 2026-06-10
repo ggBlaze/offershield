@@ -31,14 +31,13 @@ const OG_LOCALES: Record<Locale, string> = {
 };
 
 /**
- * Per-locale SEO: localized title, description, and keywords for the
- * page itself (browser tabs, search results). Social-share meta
- * (og:*, twitter:*) is in English — the brand voice stays consistent
- * regardless of which locale the link was shared from, and English
- * copy reads cleanly on international feeds.
+ * Per-locale SEO. Every meta tag — including the social-share
+ * ones — is in the same language as the URL, so a Spanish link
+ * shared on Twitter/X shows a Spanish preview, a Chinese link
+ * shows a Chinese preview, and so on.
  *
- * The hreflang alternates connect every locale to every other locale
- * so Google indexes the cluster correctly.
+ * The hreflang alternates connect every locale to every other
+ * locale so Google indexes the cluster correctly.
  */
 export async function generateMetadata(
   { params }: { params: { lang: string } },
@@ -48,11 +47,6 @@ export async function generateMetadata(
   const dict = dictionaries[lang];
   const path = `/${lang}`;
   const canonical = `${siteUrl}${path}`;
-
-  // English social copy. This is the brand voice for share cards.
-  const socialTitle = "OfferShield.pro — Understand contracts before you sign";
-  const socialDescription =
-    "Plain-English explanations, risk flags, obligations, and smart questions to ask. Built with love using MiniMax-M3. Try it free at offershield.pro.";
 
   // Build alternates for every locale.
   const languages: Record<string, string> = {};
@@ -81,15 +75,15 @@ export async function generateMetadata(
       canonical,
       languages,
     },
-    // Social-share metadata: always in English (the brand voice),
-    // pointing at this page's canonical URL.
+    // Social-share metadata: localized to the URL. Sharing /es
+    // shows a Spanish preview; sharing /zh shows Chinese; etc.
     openGraph: {
       type: "website",
       url: canonical,
-      title: socialTitle,
-      description: socialDescription,
+      title: dict.meta.title,
+      description: dict.meta.description,
       siteName: "OfferShield.pro",
-      locale: "en_US",
+      locale: OG_LOCALES[lang],
       // og:locale:alternate — let crawlers know the page is also
       // available in these other locales.
       // (Next.js 14 doesn't have a direct field for og:locale:alternate
@@ -99,15 +93,15 @@ export async function generateMetadata(
           url: `${siteUrl}/${lang}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: "OfferShield.pro — Understand contracts before you sign",
+          alt: dict.meta.title,
           type: "image/png",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: socialTitle,
-      description: socialDescription,
+      title: dict.meta.title,
+      description: dict.meta.description,
       creator: "@OGDegen",
       site: "@OGDegen",
       images: [`${siteUrl}/${lang}/opengraph-image`],

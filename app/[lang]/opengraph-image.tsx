@@ -16,15 +16,12 @@ export function generateStaticParams() {
 }
 
 /**
- * Social-share card for OfferShield.pro.
+ * Per-locale dynamic OG image.
  *
- * Brand voice stays in English (the marketing/identity language of
- * the product) regardless of which locale the page is being served
- * from, so a link shared from `/es` or `/zh` still shows a clean,
- * professional English card on Twitter / LinkedIn / WhatsApp.
- *
- * The page itself remains fully localized — only the *share card*
- * stays in English.
+ * The card text is in the same language as the URL: a Spanish link
+ * shared on Twitter/X shows a Spanish card, a Chinese link shows a
+ * Chinese card, and so on. The product name "OfferShield.pro" stays
+ * in Latin script everywhere (it's a brand mark, not a sentence).
  *
  * Implementation notes for @vercel/og / satori:
  *   - Every <div> with more than one child must set
@@ -33,6 +30,8 @@ export function generateStaticParams() {
 export default function OgImage({ params }: { params: { lang: string } }) {
   const lang = params.lang as Locale;
   if (!isLocale(lang)) notFound();
+
+  const copy = copyFor(lang);
 
   return new ImageResponse(
     (
@@ -97,26 +96,25 @@ export default function OgImage({ params }: { params: { lang: string } }) {
           <div
             style={{
               display: "flex",
-              fontSize: 68,
+              fontSize: 64,
               fontWeight: 700,
-              lineHeight: 1.05,
+              lineHeight: 1.1,
               letterSpacing: -1.5,
               maxWidth: 980,
             }}
           >
-            Understand contracts before you sign.
+            {copy.headline}
           </div>
           <div
             style={{
               display: "flex",
-              fontSize: 26,
+              fontSize: 24,
               color: "rgba(255,255,255,0.7)",
-              lineHeight: 1.4,
-              maxWidth: 950,
+              lineHeight: 1.45,
+              maxWidth: 980,
             }}
           >
-            Plain-English explanations, risk flags, obligations, and smart
-            questions — built with love using MiniMax-M3.
+            {copy.tagline}
           </div>
         </div>
 
@@ -127,12 +125,7 @@ export default function OgImage({ params }: { params: { lang: string } }) {
             gap: 12,
           }}
         >
-          {[
-            "Plain English",
-            "Risk Flags",
-            "Key Dates",
-            "Smart Questions",
-          ].map((label) => (
+          {copy.pills.map((label) => (
             <div
               key={label}
               style={{
@@ -161,13 +154,58 @@ export default function OgImage({ params }: { params: { lang: string } }) {
             color: "rgba(255,255,255,0.5)",
           }}
         >
-          <div style={{ display: "flex" }}>
-            Educational, not legal advice.
-          </div>
-          <div style={{ display: "flex" }}>offershield.pro</div>
+          <div style={{ display: "flex" }}>{copy.disclaimer}</div>
+          <div style={{ display: "flex" }}>offershield.pro/{lang}</div>
         </div>
       </div>
     ),
     { ...size },
   );
+}
+
+interface OgCopy {
+  headline: string;
+  tagline: string;
+  pills: string[];
+  disclaimer: string;
+}
+
+function copyFor(lang: Locale): OgCopy {
+  switch (lang) {
+    case "es":
+      return {
+        headline: "Entiende los contratos antes de firmar.",
+        tagline:
+          "Resúmenes claros, alertas de riesgo, obligaciones y preguntas que hacer — hecho con MiniMax-M3.",
+        pills: [
+          "Español claro",
+          "Alertas de riesgo",
+          "Fechas clave",
+          "Preguntas útiles",
+        ],
+        disclaimer: "Educativo, no consejo legal.",
+      };
+    case "zh":
+      return {
+        headline: "签署之前,先读懂合同。",
+        tagline:
+          "通俗易懂的中文摘要、风险提示、双方义务清单,以及值得提出的问题 — 用 MiniMax-M3 用心打造。",
+        pills: ["通俗解读", "风险提示", "关键日期", "实用问题"],
+        disclaimer: "仅供参考,非法律建议。",
+      };
+    case "en":
+    default:
+      return {
+        headline: "Understand contracts before you sign.",
+        tagline:
+          "Plain-English explanations, risk flags, obligations, and smart questions — built with love using MiniMax-M3.",
+        pills: [
+          "Plain English",
+          "Risk Flags",
+          "Key Dates",
+          "Smart Questions",
+        ],
+        disclaimer: "Educational, not legal advice.",
+      };
+  }
 }
