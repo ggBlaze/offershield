@@ -48,11 +48,12 @@ export async function callClaude(opts: CallOptions): Promise<string> {
 
   const body = {
     model,
-    // 3000 is enough for the full 14-section schema (each section
-    // ~50-200 words ≈ 200-300 tokens) with headroom. Lower than the
-    // previous 4096 — cuts typical response time roughly in half
-    // without truncating the structured output.
-    max_tokens: opts.maxTokens ?? 3000,
+    // 4096 covers the full 14-section schema comfortably for any
+    // contract size, including 15k-word documents and Spanish /
+    // Chinese responses which run ~15% longer than English. The
+    // 60s route maxDuration + 90s fetch timeout are sized to
+    // absorb the longer generation time.
+    max_tokens: opts.maxTokens ?? 4096,
     temperature: opts.temperature ?? 0.2,
     system: opts.system,
     messages: [{ role: "user", content: opts.user }],

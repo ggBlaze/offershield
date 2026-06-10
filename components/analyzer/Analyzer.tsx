@@ -188,7 +188,16 @@ export function Analyzer() {
 
       <div ref={resultsRef} className="min-h-[1px]">
         {status === "analyzing" || status === "uploading" ? (
-          <AnalyzingState />
+          <AnalyzingState
+            // Use the text that's actually being analyzed: the sample
+            // / pasted text / parsed PDF, whichever is current. Falls
+            // back to file size when only a PDF is staged.
+            textLength={
+              text.trim().length > 0
+                ? text.trim().length
+                : (file?.size ?? 0)
+            }
+          />
         ) : status === "error" ? (
           <ErrorState
             message={error ?? "Something went wrong."}

@@ -8,25 +8,77 @@ import { useLocale } from "@/lib/i18n";
 /**
  * Loading state shown while the AI is generating the analysis.
  *
- * Two parallel timers:
+ * Three parallel timers:
  *   - Rotates through 6 status messages every ~1.4s
- *   - Ticks the elapsed-second counter every 1s and renders a
- *     localized ETA next to the current message
+ *   - Ticks the elapsed-second counter every 1s
+ *   - Picks an ETA based on the document size, then refines it
+ *     as time passes
  *
- * The ETA assumes a worst-case 60s budget (matches the analyze
- * route's maxDuration). After 60s the UI switches to
- * "Finishing up…" to keep the user calm while the last bytes
- * stream in.
+ * ETA is honest: it varies with document length (longer
+ * contracts = wider ETA range), and it ticks down to seconds
+ * once we're inside the lower bound. After the upper bound
+ * elapses we switch to "Finishing up…" so the user doesn't
+ * panic.
  */
-export function AnalyzingState() {
+
+interface AnalyzingStateProps {
+  /**
+   * Length of the document being analyzed, in characters. Used to
+   * pick an ETA range. Pass 0 for "unknown" (falls back to the
+   * short-document bucket).
+   */
+  textLength?: number;
+}
+
+interface EtaRange {
+  min: number; // seconds — start ticking down from here
+  max: number; // seconds — switch to "Finishing up…" past here
+}
+
+function estimateEta(textLength: number): EtaRange {
+  if (textLength < 2_000) return { min: 30, max: 60 };
+  if (textLength < 10_000) return { min: 60, max: 120 };
+  return { min: 120, max: 180 };
+}
+
+function formatEta(
+  elapsed: number,
+  range: EtaRange,
+  t: {
+    etaPrefix: string;
+    etaRange: (lo: number, hi: number) => string;
+    etaMinutes: (n: number) => string;
+    etaSeconds: (n: number) => string;
+    etaFinishing: string;
+  },
+): string {
+  if (elapsed >= range.max) return t.etaFinishing;
+  if (elapsed < range.min) {
+    // Still inside the initial range — show the wide estimate.
+    const lo = Math.round(range.min / 60);
+    const hi = Math.round(range.max / 60);
+    return `${t.etaPrefix} ${t.etaRange(lo, hi)}`;
+  }
+  // Inside [range.min, range.max] — show remaining.
+  const remaining = range.max - elapsed;
+  if (remaining >= 60) {
+    const mins = Math.ceil(remaining / 60);
+    return `${t.etaPrefix} ${t.etaMinutes(mins)}`;
+  }
+  return `${t.etaPrefix} ${t.etaSeconds(remaining)}`;
+}
+
+export function AnalyzingState({ textLength = 0 }: AnalyzingStateProps) {
   const { t } = useLocale();
   const [idx, setIdx] = React.useState(0);
   const [elapsed, setElapsed] = React.useState(0);
-  // The dictionary is declared `as const`, so this tuple is typed as
-  // a fixed-length 6-tuple of literal strings. We widen to
-  // readonly string[] here so the .length / indexing logic stays
-  // dynamic.
+  // The dictionary is declared `as const`, so this tuple is typed
+  // as a fixed-length 6-tuple of literal strings. We widen to
+  // readonly string[] so the .length / indexing logic stays dynamic.
   const messages: readonly string[] = t.analyzing.messages;
+
+  // Memoize the range so it doesn't recompute every tick
+  const range = React.useMemo(() => estimateEta(textLength), [textLength]);
 
   // Rotate the status message
   React.useEffect(() => {
@@ -46,17 +98,7 @@ export function AnalyzingState() {
   }, []);
 
   const current = messages[idx] ?? messages[0] ?? "…";
-
-  // ETA: assume a 60s worst case (matches the analyze route's
-  // maxDuration). Format switches from minutes to seconds to a
-  // "finishing up" message as time elapses.
-  const remaining = Math.max(0, 60 - elapsed);
-  const etaText =
-    elapsed >= 60
-      ? t.analyzing.etaFinishing
-      : remaining >= 60
-        ? `${t.analyzing.etaPrefix} ${t.analyzing.etaAbout}`
-        : `${t.analyzing.etaPrefix} ${t.analyzing.etaSeconds(remaining)}`;
+  const etaText = formatEta(elapsed, range, t.analyzing);
 
   return (
     <div className="space-y-4" aria-busy="true" aria-live="polite">
