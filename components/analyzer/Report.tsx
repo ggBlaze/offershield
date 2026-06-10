@@ -34,6 +34,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn, formatDate, formatRiskScore, riskClasses } from "@/lib/utils";
 import type { AnalysisPayload } from "@/types/analysis";
 import { useLocale } from "@/lib/i18n";
+import { DownloadReport } from "./DownloadReport";
 
 /* --------------------------------- hooks --------------------------------- */
 
@@ -668,6 +669,8 @@ export function Report({ payload }: { payload: AnalysisPayload }) {
       </div>
 
       <DisclaimerBanner />
+
+      <DownloadReport payload={payload} />
     </section>
   );
 }

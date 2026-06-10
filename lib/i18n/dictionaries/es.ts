@@ -180,6 +180,14 @@ export const es: Dictionary = {
       title: "Lee antes de firmar",
       generatedBy: "Generado por OfferShield",
     },
+    download: {
+      title: "Guarda este informe",
+      subtitle:
+        "Descarga una copia para tus registros, para compartir con un abogado o para imprimir.",
+      htmlButton: "Guardar como HTML",
+      markdownButton: "Guardar como Markdown",
+      generating: "Preparando…",
+    },
     risk: {
       tag: "Riesgo general",
       outOf: (score: number) => ` / 100`,

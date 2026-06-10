@@ -165,6 +165,13 @@ export const zh: Dictionary = {
       title: "签署之前先读一遍",
       generatedBy: "由 OfferShield 生成",
     },
+    download: {
+      title: "保存这份报告",
+      subtitle: "下载一份副本保存记录,或与律师分享,或打印。",
+      htmlButton: "保存为 HTML",
+      markdownButton: "保存为 Markdown",
+      generating: "准备中…",
+    },
     risk: {
       tag: "整体风险",
       outOf: (score: number) => ` / 100`,
