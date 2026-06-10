@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   isLocale,
@@ -17,9 +18,16 @@ import { dictionaries, type Dictionary } from "./dictionaries";
  * the first render — both the server render and the matching client
  * hydration render — so the HTML is in the right language for SEO.
  *
- * After hydration, the user can still switch languages; we read the
- * stored value from `localStorage` on mount to honor a previously
- * saved preference (if the URL didn't already dictate it).
+ * After hydration, three things can change the locale:
+ *   1) The user clicks a language in <LanguageSwitcher> which
+ *      dispatches a "offershield:locale-change" CustomEvent. The
+ *      provider picks it up and updates state synchronously, so the
+ *      UI re-renders in the new language before the next paint.
+ *   2) The user navigates to a different locale URL (soft nav via
+ *      router.push). The provider listens to pathname changes as a
+ *      backup and re-syncs.
+ *   3) The user has a saved preference in localStorage. On mount
+ *      we honor it if it differs from the URL's initial locale.
  */
 export interface LocaleContextValue {
   locale: Locale;
@@ -44,10 +52,37 @@ export function LocaleProvider({
   initialLocale = DEFAULT_LOCALE,
 }: LocaleProviderProps) {
   const [locale, setLocaleState] = React.useState<Locale>(initialLocale);
+  const pathname = usePathname();
 
-  // Load from localStorage on mount, after hydration. If the stored
-  // value differs from what the URL said, the user's saved preference
-  // wins. (The URL is only the default for new visitors.)
+  // Sync from the URL when the pathname changes (soft navigation
+  // between locales). The first URL segment is the locale code on
+  // /[lang]/* routes and the empty string on other paths.
+  React.useEffect(() => {
+    const firstSegment = pathname.split("/").filter(Boolean)[0];
+    if (isLocale(firstSegment) && firstSegment !== locale) {
+      setLocaleState(firstSegment);
+    }
+  }, [pathname, locale]);
+
+  // Listen for explicit locale-change events dispatched by the
+  // LanguageSwitcher. We use this in addition to the pathname
+  // effect so the UI updates in the *same* paint as the click,
+  // rather than waiting for Next's RSC to fetch + render.
+  React.useEffect(() => {
+    const onChange = (e: Event) => {
+      const detail = (e as CustomEvent<{ locale: Locale }>).detail;
+      if (isLocale(detail?.locale) && detail.locale !== locale) {
+        setLocaleState(detail.locale);
+      }
+    };
+    window.addEventListener("offershield:locale-change", onChange);
+    return () =>
+      window.removeEventListener("offershield:locale-change", onChange);
+  }, [locale]);
+
+  // On first mount, honor a previously saved preference in
+  // localStorage if it differs from the URL-derived initial locale.
+  // (The URL is only the default for new visitors.)
   React.useEffect(() => {
     try {
       const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);

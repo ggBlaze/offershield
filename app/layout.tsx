@@ -105,6 +105,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-/** Re-export for convenience so other files can iterate locales. */
-export { LOCALES };
