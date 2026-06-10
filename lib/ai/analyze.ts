@@ -120,6 +120,17 @@ interface AnalyzeOptions {
    * field value the model produces. Defaults to English.
    */
   locale?: Locale;
+  /**
+   * User-supplied API key (BYOK). When present, this single call
+   * uses the user's key against the configured base URL + model.
+   * The key is never logged or stored on the server; it lives
+   * only in the scope of this request.
+   *
+   * If both `userApiKey` and the env-configured AI_API_KEY are
+   * present, the user key wins. If neither is set, we fall back
+   * to the mock (handled via `config.mockMode` in the env reader).
+   */
+  userApiKey?: string;
   /** Optional override for the mock — useful for unit tests. */
   forceMock?: boolean;
 }
@@ -130,7 +141,10 @@ export async function analyzeDocument(
   assertValidInput(opts.text);
   const locale: Locale = opts.locale ?? "en";
 
-  if (config.mockMode || opts.forceMock) {
+  const userKey = opts.userApiKey?.trim() ?? "";
+  const effectiveMockMode = config.mockMode || opts.forceMock || !userKey && !config.apiKey;
+
+  if (effectiveMockMode) {
     // Small delay so the loading state is visible in the demo.
     await new Promise((r) => setTimeout(r, 700));
     return getMockAnalysis(locale);
@@ -138,11 +152,12 @@ export async function analyzeDocument(
 
   const user = buildUserMessage(opts.text);
   const system = buildSystemPrompt(locale);
+  const apiKey = userKey || undefined; // undefined = let provider use env key
 
   // First attempt
   let text: string;
   try {
-    text = await callClaude({ system, user });
+    text = await callClaude({ system, user, apiKey });
   } catch (err) {
     if (err instanceof ProviderError) throw err;
     throw new ProviderError(
@@ -163,6 +178,7 @@ export async function analyzeDocument(
         system,
         user: `${user}\n\n${RETRY_MESSAGE}`,
         temperature: 0,
+        apiKey,
       });
       payload = parseAndValidate(retryText);
     } catch (retryErr) {

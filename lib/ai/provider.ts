@@ -11,8 +11,12 @@ import { config } from "@/lib/env";
  *
  * Compatible with:
  *   - MiniMax-M3 at https://api.minimax.io/anthropic
- *   - Anthropic directly at https://api.anthropic.com
+ *   - Anthropic directamente at https://api.anthropic.com
  *   - Any drop-in Anthropic-compatible proxy
+ *
+ * Per-call overrides for `apiKey`, `baseUrl`, and `model` let the
+ * route layer pass a user-supplied (BYOK) key without disturbing
+ * the env-based default used by /api/health and the rest of the app.
  */
 
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -39,12 +43,28 @@ interface CallOptions {
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  /**
+   * Override the env-configured API key for this single call.
+   * Used by the BYOK path — the key is sent over the wire to the
+   * provider, never logged, and dropped as soon as the call returns.
+   */
+  apiKey?: string;
+  /** Override the env-configured base URL for this single call. */
+  baseUrl?: string;
 }
 
 /** Make a single messages call and return the assistant text. */
 export async function callClaude(opts: CallOptions): Promise<string> {
   const model = opts.model ?? config.model;
-  const url = `${config.baseUrl}/v1/messages`;
+  const url = `${opts.baseUrl ?? config.baseUrl}/v1/messages`;
+  const apiKey = opts.apiKey ?? config.apiKey;
+
+  if (!apiKey) {
+    throw new ProviderError(
+      "No API key configured. Set AI_API_KEY on the server, or supply a user API key via the BYOK option.",
+      401,
+    );
+  }
 
   const body = {
     model,
@@ -65,7 +85,7 @@ export async function callClaude(opts: CallOptions): Promise<string> {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-api-key": config.apiKey,
+        "x-api-key": apiKey,
         "anthropic-version": ANTHROPIC_VERSION,
       },
       body: JSON.stringify(body),

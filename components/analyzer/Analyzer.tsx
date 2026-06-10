@@ -5,6 +5,7 @@ import { DocumentInput, type InputTab } from "./DocumentInput";
 import { AnalyzingState } from "./AnalyzingState";
 import { ErrorState } from "./ErrorState";
 import { Report } from "./Report";
+import { UserKeyInput, getUserApiKey } from "./UserKeyInput";
 import type { SampleDoc } from "@/lib/samples";
 import { getSampleById } from "@/lib/samples";
 import type { AnalysisPayload } from "@/types/analysis";
@@ -143,10 +144,20 @@ export function Analyzer() {
 
     setStatus("analyzing");
     try {
+      // BYOK: read the user-supplied key from localStorage at
+      // request time. We don't put it in component state because
+      // it would be nice if the user could change it mid-session
+      // without us holding a stale value.
+      const userApiKey = getUserApiKey();
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text: textToAnalyze, source, language: locale }),
+        body: JSON.stringify({
+          text: textToAnalyze,
+          source,
+          language: locale,
+          userApiKey: userApiKey || undefined,
+        }),
       });
       const data = (await res.json()) as
         | { result: AnalysisPayload }
@@ -171,7 +182,7 @@ export function Analyzer() {
 
   return (
     <div className="space-y-10">
-      <div id="analyzer">
+      <div id="analyzer" className="space-y-3">
         <DocumentInput
           tab={tab}
           onTabChange={handleTabChange}
@@ -184,6 +195,7 @@ export function Analyzer() {
           onAnalyze={handleAnalyze}
           busy={status === "uploading" || status === "analyzing"}
         />
+        <UserKeyInput />
       </div>
 
       <div ref={resultsRef} className="min-h-[1px]">

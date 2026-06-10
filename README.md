@@ -150,6 +150,33 @@ No database, no auth, no state-management library. Just a fast, polished, deploy
 
 ---
 
+## 🔑 BYOK — Bring Your Own Key
+
+OfferShield runs in three modes, in this priority order:
+
+1. **Your key** — if you supplied a MiniMax-M3 (`sk-cp-…`) or
+   Anthropic (`sk-ant-…`) key in the in-app "Use your own key"
+   field, your requests use it and bill against your account.
+2. **Server key** — if no user key, and `AI_API_KEY` is set on
+   the server, that key is used.
+3. **Demo mode** — if no key is available anywhere, the app
+   returns a high-fidelity canned response (no AI call).
+
+The user-supplied key is stored in your browser's `localStorage`
+only, sent to the server with each `/api/analyze` request, and
+discarded as soon as the response returns. It is never logged,
+never stored on the server, and never reaches a third party
+other than the model provider.
+
+> **Why this matters for the operator:** the site can be deployed
+> with `AI_API_KEY` unset and still be fully functional — every
+> user supplies their own key. The operator's bill stays at
+> zero (modulo the demo-mode mock).
+>
+> **Why this matters for the user:** you don't share a quota with
+> anyone, and your key never has to touch someone else's
+> dashboard.
+
 ## 🌐 Deploy
 
 You can deploy OfferShield.pro on **Vercel** (zero-config) or on

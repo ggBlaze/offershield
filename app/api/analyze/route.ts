@@ -18,6 +18,25 @@ const Body = z.object({
     .string()
     .optional()
     .transform((v) => (isLocale(v) ? v : DEFAULT_LOCALE)),
+  /**
+   * Optional user-supplied API key (BYOK). When present, this
+   * single request uses the user's key against the configured
+   * base URL + model. The key is never logged, never stored on
+   * the server, and discarded as soon as the call returns.
+   *
+   * Validated for shape only (prefix + minimum length). A real
+   * validity check would require a probe call against the
+   * provider, which we don't do — invalid keys surface as a
+   * 401/403 from the provider, surfaced to the user as a
+   * friendly error.
+   */
+  userApiKey: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || /^(sk-|sk-ant-|sk-cp-)[A-Za-z0-9_-]{16,}$/.test(v.trim()),
+      "userApiKey must look like a MiniMax (sk-cp-…) or Anthropic (sk-ant-…) key",
+    ),
 });
 
 export async function POST(req: Request) {
@@ -48,6 +67,9 @@ export async function POST(req: Request) {
     const payload = await analyzeDocument({
       text: body.text,
       locale: body.language,
+      // Empty string from the optional zod field → undefined so the
+      // AI layer falls back to the env-configured key.
+      userApiKey: body.userApiKey?.trim() || undefined,
     });
     return NextResponse.json({
       result: payload,
@@ -62,6 +84,7 @@ export async function POST(req: Request) {
       );
     }
     if (err instanceof AnalysisParseError) {
+      // Note: we log the raw text for debugging but never the key.
       console.error("[offershield] parse failed:", err.rawText);
       return NextResponse.json(
         {
@@ -73,12 +96,18 @@ export async function POST(req: Request) {
         { status: 502 },
       );
     }
+    // Surface the error message for user-supplied key failures so
+    // the user can tell "my key is invalid" from "the service is
+    // down". We never log the key itself.
+    const message =
+      err instanceof Error && err.message
+        ? err.message
+        : "Something went wrong while analyzing your document. Please try again.";
     console.error("[offershield] analyze failed:", err);
     return NextResponse.json(
       {
         error: "analysis_failed",
-        message:
-          "Something went wrong while analyzing your document. Please try again.",
+        message: message.slice(0, 300),
         retryable: true,
       },
       { status: 502 },
