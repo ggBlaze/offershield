@@ -78,6 +78,23 @@ npm run dev
 
 **No `AI_API_KEY`?** OfferShield runs in **mock mode** and returns a high-fidelity canned analysis on every request, so the app is instantly demoable with zero setup. Add a key whenever you're ready to analyze real documents.
 
+### Local troubleshooting
+
+If you see a `Server Error: Cannot find module './NNN.js'` after
+switching between `next dev` and `next build`, the dev server's
+webpack cache got mixed with the production build. The fix is one
+command:
+
+```bash
+rm -rf .next && npm run dev
+```
+
+This is a known Next.js dev-mode gotcha — running `next build` while
+`next dev` is alive (or just after, if `.next/` is already populated)
+corrupts the chunk filenames the dev server is looking for. It does
+not affect production deployments, which always build into a fresh
+image.
+
 ---
 
 ## 🧱 Stack
